@@ -1,0 +1,31 @@
+<div class="vote" v-show="activityTabs.vote" :class="{blur: isBlur }">
+	<h3 class="heading" :class="{on: vote.isVoted}">
+	<span class="icon">投票</span>死了就是了房间了设计方老师就分了就是浪费建设路附近送福利就是浪费fsslfj是否可靠</h3>
+	<p class="content">手机上来的就是简单了设计福利时间浪费闪闪发亮结束了烦死老费劲死了发生了附近闪闪发亮结束了分十分了解是发生了附近十分了解了历史积分双方就来了副书记</p>
+	<div v-if="!vote.isVoted">
+		<div v-for="section in vote.sections" class="vote-section">
+			<div class="bg"></div>
+			<div class="wrap">
+				<label class="radio" :for="section.id" @click="clickRadio($index, $event)">
+					<input :id="section.id" type="radio" :name="section.name" class="hidden-input">
+					<i class="icon"></i>
+					<span>{{ section.text }}</span>
+				</label>
+			</div>
+		</div>
+		<a class="big-btn" @click="clickVote">投票</a>
+	</div>
+	<div v-else>
+		<div v-for="section in vote.sections" class="vote-section on" :class="{highlight: $index== vote.index}">
+			<div class="bg" :style="{width: section.rate}"></div>
+			<div class="wrap">
+				<label class="radio" :for="section.id">
+					<input :id="section.id" type="radio" :name="section.name" class="hidden-input" disabled>
+					<i class="icon"></i>
+					<span>{{ section.text }} {{ section.rate }}</span>
+				</label>
+			</div>
+		</div>
+		<a class="btn-return big-btn" @click="changeActivityTab('main')">返回</a>
+	</div> 
+</div>

@@ -1,0 +1,17 @@
+<div class="questions" v-show="activityTabs.question" :class="{blur: isBlur }">
+	<div class="question clearfix" v-for="question in questions">
+		<img class="l-section" v-bind:src="question.imgurl" alt="profile">
+		<div class="r-section">
+			<div class="clearfix">
+				<span class="name fl">{{ question.name }}</span>
+				<span class="datetime fr">{{ question.date }} &nbsp; {{ question.time }}</span>
+			</div>
+			<p class="word">{{ question.word }}</p>
+		</div> 
+	</div>
+	<a class="btn-return big-btn" style="margin-bottom: 60px;" @click="changeActivityTab('main')">返回</a>
+	<div class="send-section">
+		<input class="fl text" type="text" placeholder="输入的问题内容" v-model="yourQuestion" value="" v-on:keyup.enter="popup('question')">
+		<a class="fr btn-submit" v-on:click="popup('question')">发送</a>
+	</div>
+</div>

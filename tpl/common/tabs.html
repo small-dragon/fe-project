@@ -1,0 +1,6 @@
+<div class="tabs" :class="{blur: isBlur }">
+	<a v-bind:class="{on:tabs.comment}" v-on:click="changeTab('comment')" class="tab warning">评论</a>
+	<a v-bind:class="{on:tabs.activities, level2: !activityTabs.main}"  v-on:click="changeTab('activities')" class="tab activity">活动{{ activityName }}</a>
+	<a class="tab">特卖场</a>
+	<a v-bind:class="{on:tabs.brief}"  v-on:click="changeTab('brief')" class="tab">简介</a> 
+</div>

@@ -1,0 +1,4 @@
+<div class="send-section">
+	<input class="fl text" type="text" placeholder="输入您要发送的内容" v-model="@@content" value="" v-on:keyup.enter="popup(@@type)">
+	<a class="fr btn-submit" v-on:click="popup(@@type)">发送</a>
+</div>

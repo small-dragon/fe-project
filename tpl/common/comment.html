@@ -1,0 +1,16 @@
+<div class="comments" v-show="tabs.comment" :class="{blur: isBlur }">
+	<div class="comment clearfix" v-for="comment in comments">
+		<img class="l-section" v-bind:src="comment.imgurl" alt="profile">
+		<div class="r-section">
+			<div class="clearfix">
+				<span class="name fl">{{ comment.name }}</span>
+				<span class="datetime fr">{{ comment.date }} &nbsp; {{ comment.time }}</span>
+			</div>
+			<p class="word">{{ comment.word }}</p>
+		</div> 
+	</div>
+	<div class="send-section">
+		<input class="fl text" type="text" placeholder="输入的评论内容" v-model="yourComment" value="" v-on:keyup.enter="popup('comment')">
+		<a class="fr btn-submit" v-on:click="popup('comment')">发送</a>
+	</div>
+</div>

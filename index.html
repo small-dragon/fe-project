@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+   <meta content="telephone=no" name="format-detection" />
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+   <meta http-equiv="Cache-Control" content="no-siteapp" />
+   <meta name="renderer" content="webkit">
+   <meta http-equiv="X-UA-Compatible" content="IE=9,IE=10,IE=11,IE=edge,chrome=1">
+    <link rel="stylesheet" href="css/duoli.css">
+    <script src="js/jquery@2.2.4.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/vue-resource.js"></script>
+    <script type="text/javascript" src="http://cdn.aodianyun.com/mps/player.js"></script>
+    <title>duoli_web</title>
+</head>
+<body>
+	
+	<div class="video" :class="{blur: isBlur }">
+		<div id="play" class="content">
+		</div>
+		<div class="mask">
+			<a class="i-play" v-on:click="startPlay" v-show="isPlay"><img src="images/i-play.svg" alt="play"></a>
+			<a class="i-pause" v-on:click="pausePlay" v-else><img src="images/i-pause.svg" alt="pause"></a>
+		</div>
+		<div class="menu">
+			<img class="gaussian-blur" src="images/gaussian-blur.png" height="100%" alt="mask">
+			<ul>
+				<li class="icons"><img class="icon" src="images/i-watch.svg"></i>9999+观看</li>
+				<li class="icons"><img class="icon" src="images/i-comment.svg"></i>9999+</li>
+				<li class="icons"  v-on:click="setFullScreenMode"><img class="icon" src="images/i-fullscreen.svg"></i>全屏</li>
+			</ul>
+		</div>
+	</div>
+	<div class="tabs" :class="{blur: isBlur }">
+		<a v-bind:class="{on:tabs.comment}" v-on:click="changeTab('comment')" class="tab warning">评论</a>
+		<a v-bind:class="{on:tabs.activities, level2: !activityTabs.main}"  v-on:click="changeTab('activities')" class="tab activity">活动{{ activityName }}</a>
+		<a class="tab">特卖场</a>
+		<a v-bind:class="{on:tabs.brief}"  v-on:click="changeTab('brief')" class="tab">简介</a> 
+	</div>
+	<div class="comments" v-show="tabs.comment" :class="{blur: isBlur }">
+		<div class="comment clearfix" v-for="comment in comments">
+			<img class="l-section" v-bind:src="comment.imgurl" alt="profile">
+			<div class="r-section">
+				<div class="clearfix">
+					<span class="name fl">{{ comment.name }}</span>
+					<span class="datetime fr">{{ comment.date }} &nbsp; {{ comment.time }}</span>
+				</div>
+				<p class="word">{{ comment.word }}</p>
+			</div> 
+		</div>
+		<div class="send-section">
+			<input class="fl text" type="text" placeholder="输入的评论内容" v-model="yourComment" value="" v-on:keyup.enter="popup('comment')">
+			<a class="fr btn-submit" v-on:click="popup('comment')">发送</a>
+		</div>
+	</div>
+
+  <div class="activities" v-show="tabs.activities">
+  	<div class="activity clearfix" v-show="activityTabs.main" :class="{blur: isBlur }" v-for="activity in activities">
+  		<img v-bind:src="activity.imgUrl" :alt="activity.heading" class="l-section">
+  		<div class="r-section">
+  			<div class="content">
+  				<P class="heading">{{ activity.heading }}</P> 
+  				<p class="desc">{{ activity.desc }}</p>
+  			</div>
+  			<a class="btn fr" @click="enterPage(activity.btnText)" :class="{isExpired: activity.isExpired}">{{ activity.isExpired ? '已过期' : activity.countdown || activity.btnText }}</a>
+  		</div>
+  	</div>
+  	<div class="ticket" v-show="activityTabs.ticket" :class="{blur: isBlur }">
+  		<div class="section">
+  			<h3 class="highlight">恭喜您已获得优惠券</h3>
+  			<p class="clearfix">
+  				<input v-show="ticket.noSend" class="fl text" maxlength="11" type="text" placeholder="请准确输入手机号码获取优惠券" v-model="ticket.phoneNumber" value="" v-on:keyup.enter="sendPhoneNumber">
+  				<span v-else class="info-text fl">优惠券已发送到 {{ ticket.phoneNumber }}，请查阅短信内容</span>
+  				<a class="fr btn-submit" :class="{out:ticket.flag}" v-on:click="sendPhoneNumber">发送</a>
+  			</p>
+  		</div>
+  		<div class="section">
+  			<h3>优惠券内容</h3>
+  			<p>问的是开放后开始疯狂双方开始后付款后是否可还是开发和是否收费记录上飞机是否接受连接方式 酸辣粉就是垃圾</p>
+  		</div>
+  		<div class="section">
+  			<h3>领取兑换方式</h3>
+  			<p>问的是开放后开始疯狂双方开始后付款后是否可还是开发和是否收费记录上飞机是否接受连接方式 酸辣粉就是垃圾</p>
+  		</div>
+  		<a class="btn-return big-btn" @click="changeActivityTab('main')">返回</a> 
+  	</div>
+  	<div class="questions" v-show="activityTabs.question" :class="{blur: isBlur }">
+  		<div class="question clearfix" v-for="question in questions">
+  			<img class="l-section" v-bind:src="question.imgurl" alt="profile">
+  			<div class="r-section">
+  				<div class="clearfix">
+  					<span class="name fl">{{ question.name }}</span>
+  					<span class="datetime fr">{{ question.date }} &nbsp; {{ question.time }}</span>
+  				</div>
+  				<p class="word">{{ question.word }}</p>
+  			</div> 
+  		</div>
+  		<a class="btn-return big-btn" style="margin-bottom: 60px;" @click="changeActivityTab('main')">返回</a>
+  		<div class="send-section">
+  			<input class="fl text" type="text" placeholder="输入的问题内容" v-model="yourQuestion" value="" v-on:keyup.enter="popup('question')">
+  			<a class="fr btn-submit" v-on:click="popup('question')">发送</a>
+  		</div>
+  	</div>
+  	<div class="vote" v-show="activityTabs.vote" :class="{blur: isBlur }">
+  		<h3 class="heading" :class="{on: vote.isVoted}">
+  		<span class="icon">投票</span>死了就是了房间了设计方老师就分了就是浪费建设路附近送福利就是浪费fsslfj是否可靠</h3>
+  		<p class="content">手机上来的就是简单了设计福利时间浪费闪闪发亮结束了烦死老费劲死了发生了附近闪闪发亮结束了分十分了解是发生了附近十分了解了历史积分双方就来了副书记</p>
+  		<div v-if="!vote.isVoted">
+  			<div v-for="section in vote.sections" class="vote-section">
+  				<div class="bg"></div>
+  				<div class="wrap">
+  					<label class="radio" :for="section.id" @click="clickRadio($index, $event)">
+  						<input :id="section.id" type="radio" :name="section.name" class="hidden-input">
+  						<i class="icon"></i>
+  						<span>{{ section.text }}</span>
+  					</label>
+  				</div>
+  			</div>
+  			<a class="big-btn" @click="clickVote">投票</a>
+  		</div>
+  		<div v-else>
+  			<div v-for="section in vote.sections" class="vote-section on" :class="{highlight: $index== vote.index}">
+  				<div class="bg" :style="{width: section.rate}"></div>
+  				<div class="wrap">
+  					<label class="radio" :for="section.id">
+  						<input :id="section.id" type="radio" :name="section.name" class="hidden-input" disabled>
+  						<i class="icon"></i>
+  						<span>{{ section.text }} {{ section.rate }}</span>
+  					</label>
+  				</div>
+  			</div>
+  			<a class="btn-return big-btn" @click="changeActivityTab('main')">返回</a>
+  		</div> 
+  	</div>
+  	<div class="share" v-show="shareShow" @click="popUpShare">
+  		<img src="images/share-word.png" width="100%" alt="share">
+  		<img class="mask" src="images/mask2.png" width="100%" height="100%" alt="mask">
+  	</div> 
+  </div> 
+  <div class="mall" :class="{blur: isBlur }" v-show="tabs.mall">
+	
+  </div>
+  <div class="brief" :class="{blur: isBlur }" v-show="tabs.brief">
+  	<div class="section">
+  		<h3>嘉宾简介</h3>
+  		<p>问的是开放后开始疯狂双方开始后付款后是否可还是开发和是否收费记录上飞机是否接受连接方式 酸辣粉就是垃圾</p>
+  		<p>问的是开放后开始疯狂双方开始后付款后是否可还是开发和是否收费记录上飞机是否接受连接方式 酸辣粉就是垃圾</p>
+  		<p>问的是开放后开始疯</p>
+  	</div>
+  	<div class="section">
+  		<h3>医院简介</h3>
+  		<p>问的是开放后开始疯狂双方开始后付款后是否可还是开发和是否收费记录上飞机是否接受连接方式 酸辣粉就是垃圾</p>
+  		<p>问的是开放后开始疯狂双方开始后付款后是否可还是开发和是否收费记录上飞机是否接受连接方式 酸辣粉就是垃圾</p>
+  		<p>问的是开放后开始疯</p>
+  	</div>
+  	<div class="section">
+  		<h3>客服电话</h3>
+  		<p><i class="i-phone"></i>问的是开放后开始疯</p>
+  	</div>
+  </div>
+	<div class="popup" v-bind:class="{on:popupshow}">
+		<p>{{ popupMsg }}</p>
+	</div>
+  <script src="js/dropload.js"></script>
+	<script src="js/scripts.js"></script>
+</body>
+</html>
