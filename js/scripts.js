@@ -36,6 +36,7 @@ var objectPlayer=new aodianPlayer({
                 question: false,
             },
             isPlay: true,
+            isTransparent: false,
             popupshow: false,
             flag: true, //设置2S提交1次到后台的阈值
             popupMsg: '',
@@ -192,6 +193,12 @@ var objectPlayer=new aodianPlayer({
             startPlay: function(){
                 this.isPlay = false;
                 objectPlayer.startPlay();
+
+                var that = this;
+                that.isTransparent = false;
+                window.setTimeout(function(){
+                    that.isTransparent = true;
+                }, 3000);
             },
             pausePlay: function(){
                 this.isPlay = true;
@@ -231,7 +238,9 @@ $('body').dropload({
         domUpdate  : '<div class="dropload-update">↑释放-更新评论</div>',
         domLoad    : '<div class="dropload-load"><span class="loading"></span>加载评论中...</div>'
     },
+    autoLoad: false,
     loadUpFn : function(me){
+        if(!vm.tabs.comment) return;  //不是评论区就不上拉加载
         // 为了测试，延迟1秒加载
         setTimeout(function(){
             vm.comments.unshift({imgurl: 'images/sample/user.png', name:'上拉加载', date: '2016年8月3号', time: '15:19:00', word: '试试楼上的开户送快递很快收到货款收到客户收递号开始的开始看到好的开始时到客户的刷卡还是打款还是看到合适的客户收到客户送快递号开始的开始看到好的开始时'});
@@ -241,37 +250,14 @@ $('body').dropload({
             me.unlock();
             me.noData(false);
         },1000);
-        /*$.ajax({
-            type: 'GET',
-            url: 'json/update.json',
-            dataType: 'json',
-            success: function(data){
-                var result = '';
-                for(var i = 0; i < data.lists.length; i++){
-                    result +=   '<a class="item opacity" href="'+data.lists[i].link+'">'
-                                    +'<img src="'+data.lists[i].pic+'" alt="">'
-                                    +'<h3>'+data.lists[i].title+'</h3>'
-                                    +'<span class="date">'+data.lists[i].date+'</span>'
-                                +'</a>';
-                }
-                // 为了测试，延迟1秒加载
-                setTimeout(function(){
-                    $('.lists').html(result);
-                    // 每次数据加载完，必须重置
-                    me.resetload();
-                    // 重置索引值，重新拼接more.json数据
-                    counter = 0;
-                    // 解锁
-                    me.unlock();
-                    me.noData(false);
-                },1000);
-            },
-            error: function(xhr, type){
-                alert('Ajax error!');
-                // 即使加载出错，也得重置
-                me.resetload();
-            }
-        });*/
     },
-    threshold : 50
+});
+$('.comments').on('touchstart', function(e){
+    e.stopPropagation();
+});
+$('.comments').on('touchmove', function(e){
+    e.stopPropagation();
+});
+$('.comments').on('touchend', function(e){
+    e.stopPropagation();
 });

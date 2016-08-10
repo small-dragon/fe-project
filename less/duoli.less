@@ -3,7 +3,7 @@
 @videoHeight: 10.9345rem;
 
 //头部按钮的区块
-.header {
+/* .header {
 	font-size: @headerFontSize;
 	color: @mainColor;
 	background: white;
@@ -24,17 +24,52 @@
 		right: 34rem/@base;
 		left: auto;
 	}
+} */
+body {
+	position: relative;
+}
+.container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1;
+}
+.header {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: @videoHeight + 89rem/@base;
+	background-color: white;
+	z-index: 1;
+}
+.main {
+    padding-top: @videoHeight + 89rem/@base;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    height: 100%;
+    overflow-y: scroll;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
 }
 
 //防止video的区块
 #play {
-	height: 100%;
+	height: @videoHeight;;
 	overflow: hidden;
 	position: absolute;
 	top: 0;
 	left: 0;
 	right: 0;
-	z-index: -1;
+	z-index: 1;
+	&.gaussianBlur {
+		.blur(5px);
+	}
 }
 
 .video {
@@ -43,12 +78,12 @@
 	background: transparent;
 
 	.mask {
-		z-index: 2;
+		z-index: 1;
 		position: absolute;
 		top: 0;
 		bottom: 0;
 		width: 100%;
-		background: black;
+		background: transparent;
 		.i-play, 
 		.i-pause {
 			position: absolute;
@@ -57,6 +92,13 @@
 			.translate(-50%, -50%);
 			width: 120rem/@base;
 			height: 120rem/@base;
+			opacity: 1;
+		}
+		.i-pause {
+			&.transparent {
+				opacity: 0;
+				.transition(opacity linear .5);
+			}
 		}
 	}
 	.menu {
@@ -108,29 +150,39 @@
 	height: 89rem/@base;
 	.display(flex);
 	.flex-direction(colomn);
-	.align-items(center);
+	.align-items(stretch);
 
 	.tab {
 		.flex(1);
+		position: relative;
 		font-size: @tabFontSize;
 		color: @mainFontColor;
-		border-right: 1px solid @borderColor;
 		text-align: center;
+		line-height: 89rem/@base;
 		&.on {
 			color: @mainColor;
 		}
 		&.level2 {
 			.flex(2);
 		} 
-		&:last-child {
-			border-right: none;
+		&:before {
+			position: absolute;
+		    content: "";
+		    top: 22rem/@base;
+		    width: 1px;
+		    left: 0;
+		    background: #d4d4d4;
+		    height: 1rem;
+		}
+		&:first-child:before {
+			background-color: white;
 		}
 		&.warning {
 			position: relative;
 			&:after {
 				position: absolute;
 				content: '';
-				top: 0;
+				top: .6rem;
 				margin-left: 2rem/@base;
 				display: inline-block;
 				width: 10rem/@base;
@@ -349,7 +401,7 @@
 
 //发表评论的地方
 .send-section {
-	position: fixed;
+	position: absolute;
 	bottom: 0;
 	width: 100%;
 	box-sizing: border-box;

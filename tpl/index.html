@@ -13,18 +13,25 @@
     <script src="js/vue.js"></script>
     <script src="js/vue-resource.js"></script>
     <script type="text/javascript" src="http://cdn.aodianyun.com/mps/player.js"></script>
+    <script src="js/dropload.js"></script>
     <title>duoli_web</title>
 </head>
 <body>
+  <div class="container">
 	<!-- 微信自带标题栏，可去掉@@include('./common/header.html') -->
-	@@include('./common/video.html')
-	@@include('./common/tabs.html')
-	@@include('./common/comment.html')
-  @@include('./common/activities.html')
-  @@include('./common/mall.html')
-  @@include('./common/brief.html')
+  <div class="header">
+  	@@include('./common/video.html')
+  	@@include('./common/tabs.html')
+  </div>
+
+  <div class="main">
+  	@@include('./common/comment.html')
+    @@include('./common/activities.html')
+    @@include('./common/mall.html')
+    @@include('./common/brief.html')
+  </div>
 	@@include('./common/popup-msg.html')
-  <script src="js/dropload.js"></script>
+  </div>
 	<script src="js/scripts.js"></script>
 </body>
 </html>

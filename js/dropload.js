@@ -94,19 +94,19 @@
 
         // 绑定触摸
         me.$element.on('touchstart',function(e){
-            if(!me.loading){
+            if(!me.loading && vm.tabs.comment){
                 fnTouches(e);
                 fnTouchstart(e, me);
             }
         });
         me.$element.on('touchmove',function(e){
-            if(!me.loading){
+            if(!me.loading && vm.tabs.comment){
                 fnTouches(e, me);
                 fnTouchmove(e, me);
             }
         });
         me.$element.on('touchend',function(){
-            if(!me.loading){
+            if(!me.loading && vm.tabs.comment){
                 fnTouchend(me);
             }
         });

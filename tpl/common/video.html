@@ -1,12 +1,10 @@
 <div class="video" :class="{blur: isBlur }">
-	<div id="play" class="content">
-	</div>
+	<div id="play" class="content" :class="{on: videoOn,gaussianBlur: isPlay }"></div>
 	<div class="mask">
 		<a class="i-play" v-on:click="startPlay" v-show="isPlay"><img src="images/i-play.svg" alt="play"></a>
-		<a class="i-pause" v-on:click="pausePlay" v-else><img src="images/i-pause.svg" alt="pause"></a>
+		<a class="i-pause" v-on:click="pausePlay" v-else :class="{transparent: isTransparent}"><img src="images/i-pause.svg" syule="display:none;" alt="pause"></a>
 	</div>
 	<div class="menu">
-		<img class="gaussian-blur" src="images/gaussian-blur.png" height="100%" alt="mask">
 		<ul>
 			<li class="icons"><img class="icon" src="images/i-watch.svg"></i>9999+观看</li>
 			<li class="icons"><img class="icon" src="images/i-comment.svg"></i>9999+</li>
