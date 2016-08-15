@@ -19,18 +19,23 @@
 <body>
   <div class="container">
 	<!-- 微信自带标题栏，可去掉@@include('./common/header.html') -->
-  <div class="header">
-  	@@include('./common/video.html')
-  	@@include('./common/tabs.html')
-  </div>
+    <div class="header">
+    	@@include('./common/video.html')
+    	@@include('./common/tabs.html')
+      <div class="turnaround" v-show="tabs.comment">
+        <p>这是一个跑马灯,这是一个跑马灯，这是一个跑马灯一个跑马灯</p>
+      </div>
+    </div>
 
-  <div class="main">
-  	@@include('./common/comment.html')
-    @@include('./common/activities.html')
-    @@include('./common/mall.html')
-    @@include('./common/brief.html')
-  </div>
-	@@include('./common/popup-msg.html')
+    <div class="main">
+    	@@include('./common/comment.html')
+      @@include('./common/activities.html')
+      @@include('./common/mall.html')
+      @@include('./common/brief.html')
+    </div>
+  	@@include('./common/popup-msg.html')
+    @@include('./common/send-section.html')
+    @@include('./common/share-popup.html')
   </div>
 	<script src="js/scripts.js"></script>
 </body>

@@ -1,4 +1,4 @@
-<div class="activities" v-show="tabs.activities">
+<div class="activities" v-show="tabs.activities" style="display:none;">
 	<div class="activity clearfix" v-show="activityTabs.main" :class="{blur: isBlur }" v-for="activity in activities">
 		<img v-bind:src="activity.imgUrl" :alt="activity.heading" class="l-section">
 		<div class="r-section">
@@ -11,6 +11,5 @@
 	</div>
 	@@include('./ticket.html')
 	@@include('./question.html')
-	@@include('./vote.html')
-	@@include('./share-popup.html') 
+	@@include('./vote.html') 
 </div> 

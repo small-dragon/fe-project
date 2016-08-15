@@ -28,6 +28,7 @@ var objectPlayer=new aodianPlayer({
                 comment: true,
                 activities: false,
                 brief: false,
+                mall: false,
             },
             activityTabs: {
                 main: true,
@@ -65,7 +66,7 @@ var objectPlayer=new aodianPlayer({
             vote: {
                 isVoted: false,
                 sections: [
-                    {id: 'app1', name: 'app',  rate: '40%', text: '是否是减肥了手机费老师及福利时间浪费就是了附'},
+                    {id: 'app1', name: 'app',  rate: '40%', text: '是否是减肥了手机费老师及福利'},
                     {id: 'app2', name: 'app', rate: '20%', text: '是否是减肥了手机费老师及福利时了附'},
                     {id: 'app3', name: 'app', rate: '10%', text: '是否是减肥了手机费老了附'},
                     {id: 'app4', name: 'app', rate: '30%', text: '是否是时间浪附'},
@@ -261,3 +262,14 @@ $('.comments').on('touchmove', function(e){
 $('.comments').on('touchend', function(e){
     e.stopPropagation();
 });
+
+var $turnaround = $('.turnaround p');
+$turnaround.animate({left: '-100%'}, 5000, function(){
+        $turnaround.css('left','100%');
+    });
+window.setInterval(function(){
+    $turnaround.animate({left: '-100%'}, 10000, function(){
+        $turnaround.css('left','100%');
+    });
+}, 5000);
+

@@ -200,6 +200,44 @@ body {
 .question {
 	padding-bottom: 70rem/@base;
 }
+/* 定义一个走马灯动画 */
+
+@keyframes turnaround {
+   	from {left: 100%;}
+    to {left: -100%;}
+}
+@-webkit-keyframes turnaround {
+    from {left: 100%;}
+    to {left: -100%;}
+}
+
+.turnaround {
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 44rem/@base;
+	line-height: 44rem/@base;
+	font-size: 24rem/@base;
+	color: white;
+	background:  rgb(79,129,189);
+	overflow: hidden;
+
+	p {
+	  	position: absolute;
+	  	left: 0;
+	  	min-width: 100%;
+	  	text-indent: 2em;
+	  	/*animation: turnaround 5s  linear infinite;
+	  	-webkit-animation: turnaround 5s  linear infinite;
+	  	.animation(turnaround 5s linear infinite);*/
+
+	}
+}
+
+.comments {
+	margin-top: 44rem/@base;
+}
+
 .comment,
 .question {
 	position: relative;
@@ -241,7 +279,8 @@ body {
 
 //投票活动
 .vote {
-	padding: 40rem/@base;
+	position: relative;
+	padding: 20rem/@base 40rem/@base;
 	border-top: 1px solid @borderColor2;
 	.heading {
 		font-size: 32rem/@base;
@@ -264,6 +303,13 @@ body {
 			border-radius: 6rem/@base;
 			border: 1px solid @mainColor;
 			vertical-align: text-bottom;
+		}
+		&.sec {
+			font-size: 26rem/@base;
+			color: @mainFontColor;
+			.highlight {
+				color: @mainColor;
+			}
 		}
 	}
 	.content {
@@ -325,6 +371,10 @@ body {
 			background-color: white;
 		    vertical-align: text-bottom;
 		}
+		.p {
+			padding-top: 15rem/@base;
+			line-height: 1.2;
+		}
 	}
 }
 
@@ -382,17 +432,23 @@ body {
 	.blur(5px);
 }
 .share {
-	position: fixed;
+	position: absolute;
 	top: 0;
 	bottom: 0;
 	left: 0;
 	right: 0;
 	z-index: 100;
+
+	.word {
+		position: absolute;
+		top: 0;
+		z-index: 2;
+	}
 	
 	.mask {
 		position: absolute;
 		top: 0;
-		z-index: -1;
+		z-index: 1;
 		opacity: .6;
 	}
 }
@@ -489,6 +545,7 @@ body {
 }
 
 .ticket {
+	position: relative;
 	.text {
 		width: 580rem/@base;
 		margin-right: 28rem/@base;
@@ -518,6 +575,24 @@ body {
 		&.out {
 			color: @mainFontColor;
 		}
+	}
+	
+}
+
+.return-section {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0 40rem/@base;
+    z-index: 2;
+    background: white;
+
+	a {
+		font-size: @tabFontSize;
+		color: @mainColor;
+		text-align: center;
+		line-height: 89rem/@base;
 	}
 }
 
