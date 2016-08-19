@@ -1,0 +1,65 @@
+
+.pm-btn {
+    display: inline-block;
+    margin: 0;
+    padding: 2px 5px;
+    cursor: pointer;
+    white-space: nowrap;
+    color: @fontColor2;
+    border: 1px solid @fontColor2;
+    background: white;
+
+    //.display(flex);
+    //.align-items(center);
+
+    &.pm-btn-big{
+        /* width:170px;  edited by lixiaolong*/ 
+        padding: 0 25px; 
+        height: 74px;
+        line-height: 74px;
+        margin:1px;
+        font-size: @fontSize*1.5;
+    }
+
+
+
+    &.pm-btn-default {
+        color: @fontColor;
+        border: 1px solid @fontColor;
+        background: white;
+    }
+    &.pm-btn-primary {
+        color: white;
+        background: @mainColor;
+    }
+    &.pm-btn-secondary {
+        color: @mainColor;
+        border: 2px solid @mainColor;
+        background: white;
+    }
+    &.pm-btn-success {
+        color: white;
+        background: @mainColor3;
+    }
+    &.pm-btn-warning {
+        color: white;
+        background: @mainColor5;
+    }
+    &.pm-btn-danger {
+        color: white;
+        background: @mainColor4;
+    }
+}
+
+
+.pm-btn-submit {
+    width: 160px;
+    height: 40px;
+    margin: 0;
+    margin-top: 20px;
+    padding: 0;
+    cursor: pointer;
+    color: white;
+    border: none;
+    background: @mainColor;
+}

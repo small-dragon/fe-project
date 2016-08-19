@@ -1,0 +1,118 @@
+@import 'lesshat.less';
+@import 'normalize.less';
+@import 'animate.less';
+
+@bgColor:#f5f5f5;
+@mainColor:#2097fd;
+@mainColor2:#353d4a;
+@mainColor3:#8cb705;
+@mainColor4:#fe4c4c;
+@mainColor5:#ff8a00;
+@fontSize:16px; //板块标题 按钮文字 大正文
+@fontSize2:14px;//普通文字 按钮文字
+@fontColor:#666;
+@fontColor2:#cccccc;
+@cutColor:#f5f5f5;
+
+
+
+
+@navColor:#2b333e;
+@navColor2:#252c36;
+@navFontColor:#fff;
+@navFontColor2:#999;
+@navShadowColor:#d5d9da;
+@tableHeadColor:#f5f5f5;
+@tableRowColor:#fff;
+@tableRowHoverColor:#f5f5f5;
+
+
+@cutColor:#f5f5f5;
+@cutColor2:#f5f5f5;
+
+
+@fontSize3:14px;
+@fontSize4:14px;
+@fontSize5:14px;
+@fontSize6:14px;
+
+
+//@namespace: 'pm-'
+
+* {
+    font-family: 'Microsoft YaHei UI','微软雅黑','SimSun','sans-serif';
+}
+
+html,
+body {
+   height: 100%;
+}
+
+a,
+&:visited {
+    text-decoration: none;
+    color: inherit;
+}
+
+.pm-wrap {
+    margin: 0 auto;
+}
+
+
+.pm-main-container {
+    background: @bgColor;
+    padding:30px;
+    overflow-x:scroll;
+   -webkit-overflow-scrolling: touch;
+    .flex(1);
+}
+
+// .pm-container {
+//     margin: 0 25px 25px 25px;
+//     padding:28px 20px;
+//     background:white;
+// }
+.pm-fl {
+    float: left;
+}
+.pm-fr {
+    float: right;
+}
+
+.pm-flex{
+    .display(flex);
+}
+.pm-flex-column{
+    .flex-direction(column)
+}
+.pm-flex-center{
+    .justify-content(center);
+}
+.pm-flex-right{
+    .justify-content(flex-end);
+}
+.pm-flex-align-center{
+    .align-items(center);
+}
+.pm-flex-align-bottom{
+    .align-items(flex-end);
+}
+.pm-flex-align-stretch{
+    .align-items(stretch);
+}
+.pm-flex-wrap{
+    .flex-wrap(wrap);
+}
+.pm-flex-main{
+    .flex(1);
+}
+
+
+.pm-clearfix{
+  &:after{
+    content: " ";
+    display: block;
+    clear: both;
+    height: 0;
+  }
+}
