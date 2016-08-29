@@ -1,0 +1,200 @@
+@media screen and (min-width:320px) {
+    html {
+        font-size: 16px;
+    }
+}
+@media screen and (min-width:360px) {
+    html {
+        font-size: 18px;
+    }
+}
+@media screen and (min-width:375px) {
+    html {
+        font-size: 18.75px;
+    }
+}
+@media screen and (min-width:384px) {
+    html {
+        font-size: 19.2px;
+    }
+}
+@media screen and (min-width:414px) {
+    html {
+        font-size: 20.7px;
+    }
+}
+@media screen and (min-width:425px) {
+    html {
+        font-size: 21.25px;
+    }
+}
+@media screen and (min-width:500px) {
+    html {
+        font-size: 25px;
+    }
+}
+@media screen and (min-width:600px) {
+    html {
+        font-size: 30px;
+    }
+}
+@media screen and (min-width:640px)  and (orientation : portrait) {
+    html {
+        font-size: 32px;
+    }
+}
+
+
+@media screen and (min-width:768px) and (orientation : portrait) {
+    html {
+        font-size: 38.4px;
+    }
+}
+@media screen and (min-width:1024px) and (orientation : portrait) {
+    html {
+        font-size: 51.2px;
+    }
+}
+@media screen and (min-width:1536px) and (orientation : portrait) {
+    html {
+        font-size: 76.8px;
+    }
+}
+
+* {
+    font-family: 'Microsoft YaHei UI','微软雅黑','SimSun','sans-serif';
+    margin: 0;
+    padding: 0;
+      -webkit-tap-highlight-color:transparent;
+}
+
+html,
+body {
+    height: 100vh;
+    -webkit-user-select: none;
+
+    -webkit-text-size-adjust: none;
+}
+
+ol,
+ul,
+li {
+    list-style: none;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+input,
+select {
+    border: none;
+    border-radius: 0;
+
+    -webkit-appearance: none ;
+}
+
+
+a,
+&:visited {
+    text-decoration: none;
+    color: inherit;
+}
+
+.wrap {
+    position: relative;
+    width: 20rem;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: white;
+}
+
+.page-content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    -webkit-overflow-scrolling: touch;
+
+    @media screen and (orientation : landscape) {
+        & {
+            position: relative;
+            bottom: auto;
+            overflow-y: auto;
+        }
+    }
+}
+
+.hide {
+    display: none !important;
+}
+
+
+.page-content {
+    background: white;
+    padding-top: 2.41rem;;
+   -webkit-overflow-scrolling: touch;
+}
+
+.fl {
+    float: left;
+}
+.fr {
+    float: right;
+}
+
+.flex {
+    display: flex;
+}
+.flex-column {
+    flex-direction: column;
+}
+.flex-center {
+    justify-content: center;
+}
+.flex-right {
+    justify-content: flex-end;
+}
+.flex-align-top {
+    align-items: flex-start;
+}
+.flex-align-center {
+    align-items: center;
+}
+.flex-align-bottom {
+     align-items: flex-end;
+}
+.flex-align-stretch {
+     align-items: stretch;
+}
+.flex-wrap {
+    flex-wrap: wrap;
+}
+.flex-main {
+    flex: 1;
+}
+
+.clearfix{
+  &:after{
+    content: " ";
+    display: block;
+    clear: both;
+    height: 0;
+  }
+}
+
+@import 'normalize.less';
+@import 'animate.less';
+@import 'common.less';
+@import './common/header.less';
+@import './common/icon.less';

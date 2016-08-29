@@ -1,17 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <meta content="telephone=no" name="format-detection" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="Cache-Control" content="no-siteapp" />
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=9,IE=10,IE=11,IE=edge,chrome=1">
     <meta name="description" content="test">
-    <link href="css/postm.css" rel="stylesheet" />
+    <link href="css/index.css" rel="stylesheet" />
     <script src="http://cdn.bootcss.com/jquery/2.2.4/jquery.js"></script>
-    <script src="js/postm.js"></script>
-    <title>gulpfile</title>
+    <title>添加营销员</title>
 </head>
 <body>
-	<p>hello</p>
+	<div class="wrap">
+        @@include('./common/header.html')
+        <div class="page-content">
+            <div class="container">
+                <label class="section" for="section1">
+                    <p class="l">
+                        <select id="section1" name="company">
+                            <option value="1">集团公司</option>
+                             <option value="1">全国电子商务运营中心</option>
+                        </select>
+                    </p>
+                    <p class="r">
+                        <a class="right-arrow"></a>
+                    </p>
+                </label>
+                <label class="section" for="section2">
+                    <p class="l">
+                        <select id="section2" name="province">
+                            <option value="1">部门/专业局/省公司</option>
+                             <option value="1">全国电子商务运营中心</option>
+                        </select>
+                    </p>
+                    <p class="r">
+                        <a class="right-arrow"></a>
+                    </p>
+                </label>
+                <label class="section" for="section3">
+                    <p class="l">
+                        <select id="section3" name="city">
+                            <option value="1">部门/专业局/市公司</option>
+                             <option value="1">全国电子商务运营中心</option>
+                        </select>
+                    </p>
+                    <p class="r">
+                        <a class="right-arrow"></a>
+                    </p>
+                </label>
+                <label class="section" for="section4">
+                    <p class="l">
+                        <select id="section4" name="county">
+                            <option value="1">部门/专业局/县公司</option>
+                             <option value="1">全国电子商务运营中心</option>
+                        </select>
+                    </p>
+                    <p class="r">
+                        <a class="right-arrow"></a>
+                    </p>
+                </label>
+                <label class="section" for="section5">
+                    <p class="l">
+                        <select id="section5" name="network">
+                            <option value="1">支局/网点/所</option>
+                             <option value="1">全国电子商务运营中心</option>
+                        </select>
+                    </p>
+                    <p class="r">
+                        <a class="right-arrow"></a>
+                    </p>
+                </label>
+                <div class="section">
+                    <p class="l">营销员姓名</p>
+                    <p class="r">
+                        <input type="text" placeholder="请输入营销员姓名">
+                    </p>
+                </div>
+                <div class="section">
+                    <p class="l">营销员手机号</p>
+                    <p class="r">
+                        <input type="text" maxlength="11" placeholder="请输入11位手机号">
+                    </p>
+                </div>
+            </div>
+            <a class="btn-warning btn">提交</a>
+        </div>
+    </div> 
 </body>
 </html>

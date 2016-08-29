@@ -1,0 +1,85 @@
+@import 'base.less';
+@import 'common.less';
+
+.container {
+	padding: .8rem .8rem 0;
+	border-bottom: 1px solid @borderColor;
+
+	.section {
+		display: flex;
+		justify-content: space-between;
+		height: 2.33rem;
+		line-height: 2.33rem;
+		padding: 0 .265rem 0 1.13rem;
+		border: 1px solid @borderColor;
+		font-size: .7rem;
+		margin-bottom: .8rem;
+		color: @fontColor;
+	} 
+
+	select {
+		border: none;
+		background-color: transparent;
+		appearance: none;
+		-webkit-appearance: none;
+		outline: none;
+		color: @fontColor;
+		width: 17rem;
+
+		&:focus {
+			color: darken(@fontColor, 50%)
+		}
+	}
+
+	input {
+		height: 1.8rem;
+		width: 9.76rem;
+		line-height: 1.8rem;
+		font-size: .7rem;
+		text-indent: .5em;
+		border: 1px solid @borderColor;
+	}
+
+	.right-arrow {
+		position: absolute;
+		top: .8rem;
+		right: .5rem;
+		display: inline-block;
+		width: .7rem;
+		height: .7rem;
+		border: 1px solid transparent;
+		border-right-color: #eee;
+		border-bottom-color: #eee;
+		transform: rotate(-45deg); 
+		pointer-events: none;
+	}
+
+	.r {
+		position: relative;
+
+		label.error {
+		    position: absolute;
+		    top: 1.6rem;
+		    left: 0;
+		    color: red;
+		}
+	}
+	
+}
+
+.btn {
+	display: block;
+	height: 2.33rem;
+	line-height: 2.33rem;
+	width: 16rem;
+	border: none;
+	margin: 1.51rem 1.13rem;
+	background-color: blue;
+	color: white;
+	font-size: 1rem;
+	text-align: center;
+
+	&.btn-warning {
+		background-color: #FE971D
+	}
+}

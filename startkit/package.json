@@ -1,12 +1,15 @@
 {
-  "name": "gulp-test",
+  "name": "main-sell",
   "version": "1.0.0",
-  "description": "gulp test",
-  "main": "gulpfile2.js",
+  "description": "startkit",
+  "main": "gulpfile.js",
   "scripts": {
-    "test": "don't be a mistake"
+    "test": "test test hello test"
   },
-  "author": "",
+  "keywords": [
+    "test"
+  ],
+  "author": "small dragon",
   "license": "ISC",
   "devDependencies": {
     "browser-sync": "^2.14.0",
@@ -14,6 +17,7 @@
     "gulp-file-include": "^0.14.0",
     "gulp-less": "^3.1.0",
     "gulp-sourcemaps": "^1.6.0",
+    "http-proxy": "^1.14.0",
     "less-plugin-autoprefix": "^1.5.1",
     "stream-combiner2": "^1.1.1"
   }
