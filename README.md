@@ -5,3 +5,7 @@
 ## Vue-project
 - duoli_web 是一个外包项目，用Vue 写好的单页面
   Vue 果然是一个好东西，非常简洁，好用
+
+## StartKit 20160930
+新写的一个Gulp项目脚手架，保留了还未Gulp之前的原始文件，结合 [Gulp实战-加强版](https://github.com/small-dragon/posts/blob/master/Gulp%E5%AE%9E%E6%88%98-%E5%8A%A0%E5%BC%BA%E7%89%88.md)理解更好
+属于更完善的Gulp项目脚手架
