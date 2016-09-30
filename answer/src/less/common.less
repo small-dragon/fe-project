@@ -1,0 +1,79 @@
+html {
+    font-size: 5vw;
+}
+
+* {
+    font-family: 'Microsoft YaHei UI','微软雅黑','SimSun','sans-serif';
+    margin: 0;
+    padding: 0;
+      -webkit-tap-highlight-color:transparent;
+}
+
+html,
+body {
+    height: 100vh;
+    -webkit-user-select: none;
+
+    -webkit-text-size-adjust: none;
+}
+
+ol,
+ul,
+li {
+    list-style: none;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+input,
+select {
+    border: none;
+    border-radius: 0;
+
+    -webkit-appearance: none ;
+}
+
+
+a,
+&:visited {
+    text-decoration: none;
+    color: inherit;
+}
+
+.hide {
+    display: none !important;
+}
+
+
+.page-content {
+    background: white;
+    padding-top: 2.41rem;;
+   -webkit-overflow-scrolling: touch;
+}
+
+.fl {
+    float: left;
+}
+.fr {
+    float: right;
+}
+
+
+.clearfix{
+  &:after{
+    content: " ";
+    display: block;
+    clear: both;
+    height: 0;
+  }
+}
+
+@import 'normalize.less';
