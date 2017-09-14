@@ -501,5 +501,56 @@
     return result
   }
 
+  _.difference = restArgs(function(array, rest) {
+    rest = flatten(rest, true, true)
+    return _.filter(array, function(value){
+      return !_.contains(rest, value)
+    })
+  })
+
+  _.unzip =  function(array) {
+    var length = array && _.max(array, getLength).length || 0
+    var result = Array(length)
+
+    for (var index = 0; index < length; index++) {
+      result[index] = _.pluck(array, index)
+    }
+    return result
+  }
+
+  _.zip = restArgs(_.unzip)
+
+  _.object = function(list, values) {
+    var result = {}
+    for (var i = 0, length = getLength(list); i < length; i++) {
+      if (values) {
+        result[list[i]] = values[i] 
+      } else {
+        result[list[i][0]] = list[i][1]
+      }
+    }
+    return result
+  }
+
+  var createPredicateIndexFinder = function(dir) {
+    return function(array, predicate, context) {
+      predicate = cb(predicate, context)
+      var length = getLength(array)
+      var index = dir > 0 ? 0 : length -1
+      for (; index >= 0 && index < length; index += dir) {
+        if (predicate(array[index]), index, array) return index
+      }
+    }
+  }
+
+  _.findIndex = createPredicateIndexFinder(1)
+  _.findLastIndex = createPredicateIndexFinder(-1)
+
+  _sortedIndex = function(array, obj, iteratee, context) {
+    iteratee = cb(iteratee, context, 1)
+    var value = iteratee(obj)
+    var low = 0, high = getLength(array)
+  }
+
 
 })
