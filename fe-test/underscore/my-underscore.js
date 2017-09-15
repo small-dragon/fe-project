@@ -74,6 +74,7 @@
   }
 
   var restArgs = function(func, startIndex) {
+    // -1是因为总要有个rest参数
     startIndex = startIndex == null ? func.length - 1 : +startIndex
     return function() {
       var length = Math.max(arguments.length - startIndex, 0),
@@ -546,10 +547,181 @@
   _.findIndex = createPredicateIndexFinder(1)
   _.findLastIndex = createPredicateIndexFinder(-1)
 
-  _sortedIndex = function(array, obj, iteratee, context) {
+  _.sortedIndex = function(array, obj, iteratee, context) {
     iteratee = cb(iteratee, context, 1)
     var value = iteratee(obj)
     var low = 0, high = getLength(array)
+    while (low < high) {
+      var mid = Math.floor((low + high) / 2)
+      if (iteratee(array[mid]) < value) low = mid + 1
+      else high = mid
+    }
+    return low
+  }
+
+  var createIndexFinder = function(dir, predicateFind, sortedIndex) {
+    return function(array, item, idx) {
+      var i = 0, length = getLength(array)
+      if (typeof idx == 'number') {
+        if (dir > 0) {
+          i = idx >= 0 ? idx : Math(idx + length, i)
+        } else {
+          length = idx >= 0 : Math.min(idx + 1, length) : idx + length + 1
+        }
+      } else if (sortedIndex && idx && length) {
+        idx = sortedIndex(array, item)
+        return array[idx] === item ? idx : -1
+      }
+
+      if (item !== item) {
+        idx = predicateFind(slice.call(array, i, length), _.isNaN)
+        return idx >= 0 ? idx + i : -1
+      }
+      for (idx = dir > 0 ? i : length - 1; idx >= 0 && idx < length; idx += dir) {
+        if (array[idx] === item) return idx
+      }
+      return -1
+    }
+  }
+
+  _.indexOf = createIndexFinder(1, _.findIdex, _.sortedIndex)
+  _.lastIndexOf = createIndexFinder(-1, _.findLastIndex)
+
+  _.range = function(start, stop, step) {
+    if (stop == null) {
+      stop = start || 0
+      start = 0
+    }
+    if (!step) {
+      step = stop < start  ? -1 : 1
+    }
+
+    var length = Math.max(Math.ceil((stop - start) / step), 0)
+    var range = Array(length)
+
+    for (var idx = 0; idx < length; idx++, start += step) {
+      range[idx] = start
+    }
+
+    return range
+  }
+
+  _.chuck = function(array, count) {
+    if (count == null || count < 1) return []
+    var result = []
+    var i = 0, length = array.length
+    while (i < length) {
+      result.push(slice.call(array, i, i += count))
+    }
+    return result
+  }
+
+  // Function (ahem) Functionsk
+  
+  var executeBound = function(sourceFunc, boundFunc, context, callingContext, args) {
+    if (!(callingContext instanceof boundFunc)) return sourceFunc.apply(context, args)
+    var self = baseCreate(sourceFunc.prototype)
+    var result = sourceFunc.apply(self, args)
+    if (_.isObject(result)) return result
+    return self
+  }
+
+  _.bind = restArgs(function(func, context, args) {
+    if (!_.isFunction(func)) throw new TypeError('bind must be called on a function')
+    var bound = restArgs(function(callArgs) {
+      return executeBound(func, bound, context, this, args.concat(callArgs))
+    })
+    return bound
+  })
+
+  _.partial = restArgs(function(func, boundArgs) {
+    var placeholder = _.partial.placeholder
+    var bound = function() {
+      var position = 0, length = boundArgs.length
+      var args = Array(length)
+      for (var i = 0; i < length; i++) {
+        args[i] = boundArgs[i] === placeholder ? arguments[position++] : boundArgs[i]
+      }
+      while (position < arguments.length) args.push(arguments[position++])
+      return executeBound(func, bound, this, this, args)
+    }
+    return bound
+  })
+
+  _.partial.placeholder = _
+
+  _.bindAll = restArgs(function(obj, keys) {
+    keys = flatten(keys, false, false)
+    var index = keys.length
+    if (index < 1) throw new Error('bindAll must be passed function name')
+    while (index--) {
+      var key = keys[index]
+      obj[key] = _.bind(obj[key], obj)
+    }
+  })
+
+  _.memoize = function(func, hasher) {
+    var memoize = function(key) {
+      var cache = memoize.cache
+      var address = '' + (hasher ? hasher.apply(this, arguments) : key)
+      if (!_.has(cache, address)) cache[address] = func.apply(this, arguments)
+      return cache[address]
+    }
+    memoize.cache = {}
+    return memoize
+  }
+
+  _.delay = restArgs(function(func, wait, args) {
+    return setTimeout(function() {
+      return func.apply(null, args)
+    })
+  })
+
+  _.defer = _.partial(_.delay, 1)
+
+  _.throttle = function(func, wait, options) {
+    var timeout, context, args, result
+    var previous = 0
+    if (!options) options = {}
+
+    var later = function() {
+      previous = options.leading === false ? 0 : _.now()
+      timeout = null
+      result = func.apply(context, args)
+      if (!timeout) context = args = null
+    }
+
+    var throttled = function() {
+      var now = _.now()
+      if (!previous && options.leading === false) previous = now
+      var remaining = wait - (now - previous)
+      context = this
+      args = arguments
+      if (remaining <= 0 || remaining > wait) {
+        if (timeout) {
+          clearTimeout(timeout)
+          timeout = null
+        }
+        previous = now
+        result = func.apply(context, args)
+        if (!timeout) context = args = null
+      } else if (!timeout && options.trailing !== false) {
+        timeout = setTimeout(later, remaining)
+      }
+      return result
+    }
+
+    throttled.cancel = function() {
+      clearTimeout(timeout)
+      previous = 0
+      timeout = context = args = null
+    }
+
+    return throttled
+  }
+
+  _.wrap = function(func, wrapper) {
+    return _.partial(wrapper, func)
   }
 
 
