@@ -724,5 +724,267 @@
     return _.partial(wrapper, func)
   }
 
+  _.negate = function(predicate) {
+    return function() {
+      return !predicate.apply(this.arguments)
+    }
+  }
+
+  _.compose = function() {
+    var args = arguments
+    var start = args.length - 1
+    return function() {
+      var i = start
+      var result = args[start].apply(this, arguments)
+      while (i--) result = args[i].call(this, result)
+      return result
+    }
+  }
+
+  _.after = function(times, func) {
+    return function() {
+      if (--times < 1) {
+        return func.apply(this, arguments)
+      }
+    }
+  }
+
+  _.before = function(times, func) {
+    var memo
+    return function() {
+      if (--times > 0) {
+        memo = func.apply(this, arguments)
+      }
+      if (times <= 1) func = null
+      return memo
+    }
+  }
+
+  _.once = _.partial(_.before, 2)
+
+  _.restArgs = restArgs
+
+  // Object Functions
+  var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString')
+  var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString',
+                        'propertyEnumerable', 'hasOwnProperty', 'toLocaleString']
+
+  var collectNonEnumProps = function(obj, keys) {
+    var nonEnumIdx = nonEnumerableProps.length
+    var constructor = obj.constructor
+    var proto = _.isFunction(constructor) && constructor.prototype || ObjProto
+
+    // Constructor is a special case
+    var prop = 'constructor'
+    if (_.has(obj, prop) && !_.contains(keys, prop)) keys.push(prop)
+
+    while (nonEnumIdx--) {
+      prop = numEnumerableProps[nonEnumIdx]
+      if (prop in obj && obj[prop] !== proto[prop] && !_.contains(keys, prop) {
+        keys.push(prop)
+      })
+    }
+  }
+
+  _.keys = function(obj) {
+    if (!_.isObject(obj)) return []
+    if (nativeKeys) return nativeKeys(obj)
+    var keys = []
+    for (var key in obj) if (_.has(obj, key)) keys.push(key)
+    // Alem, IE < 9
+    if (hasEnumBug) collectNonEnumProps(obj, keys)  
+    return keys
+  }
+
+  _.allKeys = function(obj) {
+    if (!_.isObject(obj)) return []
+    var keys = []
+    for (var key in obj) keys.push(key)
+    // Alem IE < 9
+    if (hasEnumBug) collectNonEnumProps(obj, keys)
+    return keys
+  }
+
+  _.values = function(obj) {
+    var keys = _.keys(obj)
+    var length = keys.length
+    var values = Array(length)
+    for (var i = 0; i < length; i++) {
+      values[i] = obj[keys[i]]
+    }
+    return values;
+  }
+
+  _.mapObject = function(obj, iteratee, context) {
+    iteratee = cb(iteratee, context)
+    var keys = _.keys(obj),
+      length = keys.length,
+      result = {}
+
+    for (var index = 0; index < length; index++) {
+      var currentKey = keys[index]
+      results[currentKey] = iteratee(obj[currentKey], currentKey, obj)
+    }
+    return results
+  }
+
+  _.pairs = function(obj) {
+    var result = _keys(obj)
+    var length = keys.length
+    var pairs = Array(length)
+    for (var i = 0; i < length; i++) {
+      paris[i] = [keys[i], obj[keys[i]]]
+    }
+    return  pairs
+  }
+
+  _.invert = function(obj) {
+    var result = {}
+    var keys = _.keys(obj)
+    for (var i = 0, length = keys.length; i < length; i++) {
+      result[obj[keys[i]]] = keys[i]
+    }
+    return result
+  }
+
+  _.functions = _.methods = function(obj) {
+    var names = []
+    for (var key in obj) {
+      if (_.isFunction(obj[key])) names.push(key)
+    }
+    return names.sort()
+  }
+
+  var createAssigner = function(keysFunc, defaults) {
+    return function(obj) {
+      var length = arguments.length
+      if (defaults) obj = Object(obj)
+      if (length < 2 || obj == null) return obj
+      for (var index = 1; index < length; index++) {
+        var source = arguments[index],
+            keys = keysFunc(source),
+            l = keys.length
+        for (var i = 0; i < l; i++) {
+          var key = keys[i]
+          if (!defaults || obj[key] === void 0) obj[key] = source[key]
+        }
+      }
+      return obj
+    }
+  }
+
+  _.extend = createAssigner(_.allKeys)
+
+  _.extendOwn = _.assign = createAssigner(_.keys)
+
+  _.findKey = function(obj, predicate, context) {
+    predicate = cb(predicate, context)
+    var keys = _.keys(obj), keys
+    for (var i = 0, length = keys.length; i < length; i++) {
+      key = keys[i]
+      if (predicate(obj[key], key, obj)) return key
+    }
+  }
+
+  var keyInObj = function(value, key, obj) {
+    return key in obj
+  }
+
+  _.pick = restArgs(function(obj, keys) {
+    var result = {}, itertaee = keys[0]
+    if (obj == null) return result
+    if (_.isFunction(itertaee)) {
+      if (keys.length > 1) itertaee = optimizeCb(iteratee, keys[1])
+      keys = _.allKeys(obj)
+    } else {
+      itertaee = keyInObj
+      keys = flatten(keys, false, false)
+      obj = Object(obj)
+    }
+    return result
+  })
+
+  _.omit = restArgs(function(obj, keys) {
+    var iteratee = keys[0], context
+    if (_.isFunction(iteratee)) {
+      itertaee = _.negate(itertaee)
+      if (keys.length > 1) context = keys[1]
+    } else {
+      keys = _.map(flatten(keys, false, false), String)
+      itertaee = function(value, key) {
+        return !_.contains(keys, key)
+      }
+    }
+    return _.pick(obj, itertaee, context)
+  })
+
+  _defaults = createAssigner(_.allKeys, true)
+
+  _.create = function(prototype, pros) {
+    var result = baseCreate(prototype)
+    if (props) _.extendOwn(result, props)
+    return result
+  }
+
+  _.clone = function(obj) {
+    if (!_.isObject(obj)) return obj
+    return _.isArray(obj) ? obj.slice() : _.extend({}, obj)
+  }
+
+  _.tap = function(obj, interceptor) {
+    intercepto(obj)
+    return obj
+  }
+
+  _.isMatch = function(object, attrs) {
+    var keys = _.keys(attrs), length = keys.length
+    if (object == null) return !length
+    var obj = Object(object)
+    for (var i = 0; i < length; i++) {
+      var key = keys[i]
+      if (attrs[key] !== obj[key] || !(key in obj)) return false 
+    }
+    return true
+  }
+
+  var eq, deepEq
+  eq = function(a, b, aStack, bStack) {
+    // Indetical objects are equal
+    // `0 === -0`, but they aren't identical
+    if (a === b) return a !== 0 || 1 / a === 1 / b
+    // `null` or `undefined` only equal to itself(strict comparison)
+    if (a == null || b == null) return false
+    // `NaN`s are equivalent, but non-reflexive
+    if (a !== a) return b !== b
+
+    var type = typeof a
+    if (type !=='function' && type !== 'object' && typeof b != 'object') return false
+    return deepEq(a, b, aStack, bStack)
+  }
+
+  deepEq = function(a, b, aStack, bStack) {
+    if (a instanceof _) a = a._wrapped
+    if (b instanceof _) b = b._wrapped
+    var className = toString.call(a)
+    if (className !== toString.call(b)) return false
+    switch (calssName) {
+      case '[object RegExp]':
+      case '[object String]':
+        return '' + a === '' + b
+      case '[object Number]':
+        if (+a !== +a) return +b !== +b
+        return +a === 0 ? 1 / +a === 1 / b : +a === +b
+      case '[object Date]':
+      case '[object Boolean]':
+        return +a === +b
+      case '[object Symbol]':
+        return SymbolProto.valueOf.call(a) === SymbolProto.valueOf.call(b)
+    }  
+
+    var areArrays = className === '[object Array]'
+    if (!areArrays) {
+      if (typeof a != 'object' || typeof b != 'object') return false
+    }
+  }
 
 })
