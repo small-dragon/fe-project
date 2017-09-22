@@ -984,7 +984,116 @@
     var areArrays = className === '[object Array]'
     if (!areArrays) {
       if (typeof a != 'object' || typeof b != 'object') return false
+      var aCtor = a.constructor, bCtor = b.constructor
+      if (aCtor !== bCtor && !(_.isFunction(aCtor) && aCtor instanceof aCtor &&
+                               _.isFunction(bCtor) && bCtor instanceof bCtor)
+                          && ('constructor' in a && 'constructor' in b)) {
+        return false
+      }
     }
+
+    aStack = aStack || []
+    bStack = bStack || []
+    var length = aStack.length
+    while (length--) {
+      if (aStack[length] === a) return bStack[length] === b
+    }
+
+    aStack.push(a)
+    bStack.push(b)
+
+    if (areArrays) {
+      length = a.length
+      if (length !== b.length) return false
+        while(length--) {
+          if (!eq(a[length], b[length], aStack, bStack)) return false
+        }
+    } else {
+      var keys = _.keys(a), key
+      length = keys.length
+      if (_.keys(b).length !== length) return false
+      while (length--) {
+        key = keys[length]
+        if (!(_.has(b, key) && eq(a[key], b[key], aStack, bStack))) return false
+      }
+    }
+    aStack.pop()
+    bStack.pop()
+    return true
+  }
+
+  _.isEuqal = function(a, b) {
+    return eq(a, b)
+  }
+
+  _.isEmpty = function(obj) {
+    if (obj == null) return true
+    if (isArrayLike(obj) && (_.isArray(obj) || _.isString(obj) || _.isArguments(obj))) return obj.length
+    return _.keys(obj).length === 0
+  }
+
+  _.isElement = function(obj) {
+    return !!(obj && obj.nodeType === 1)
+  }
+
+  _.isArray = nativeIsArray || function(obj) {
+    return toString.call(obj) === '[object Array]'
+  }
+
+  _.isObject = function(obj) {
+    var type = typeof obj
+    return type === 'function' || type === 'object' && !!obj
+  }
+
+  _.each(['!Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp', 'Error', 'Symbol', 'Map',
+            'WeakMap', 'Set', 'WeakSet'], function(name) {
+    _['is' + name] = function(obj) {
+      return toString.call(obj) === '[object' + name + ']'
+    }         
+  })
+
+  if (!_.isArguments(arguments)) {
+    _.isArguments = function(obj) {
+      return _.has(obj, 'callee')
+    }
+  }
+
+  var nodelist = root.document && root.document.childNodes
+  if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof nodelist != 'function') {
+    _.isFunction = function(obj) {
+      return typeof obj == 'function' || false
+    }
+  }
+
+  _.isFinite = function(obj) {
+    return !_.isSymbol(obj) && isFinite(obj) && !isNaN(parseFloat(obj))
+  }
+
+  _.isNaN = function(obj) {
+    return _.isNumber(obj) && isNaN(obj)
+  }
+
+  _.isNull = function(obj) {
+    return obj === null
+  }
+
+  _.isUndefined = function(obj) {
+    return obj === void 0
+  }
+
+  _.has = function(obj, path) {
+    if (!_.isArray(path)) {
+      return obj != null && hasOwnProperty.call(obj, path)
+    }
+    var length = path.length
+    for (var i = 0; i< length; i++) {
+      var key = path[i]
+      if (obj == null || !hasOwnProperty.call(obj, key)) {
+        return false
+      }
+      obj = obj[key]
+    }
+    return !!length
   }
 
 })
