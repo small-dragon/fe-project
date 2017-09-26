@@ -1,32 +1,44 @@
 (function() {
+  // 建立 root 对象，在浏览器中等于 'window'、'self'
+  // 在服务器中 等于`global`，在虚拟机中等于 this
+  // 使用 `self` 而不是 `window` 是因为 `webworker` 支持 `self`
   var root = typeof self == 'object' && sef.self === self && self ||
     typeof global == 'object' && global.global === global && global ||
-    this || {} // @todo
+    this || {}
 
+  // 保存 `_`变量之前的值，在有冲突 `_` 时会用到
   var previousUnderscore = root._
 
+  // 更好压缩，也少打一些字
   var ArrayProto = Array.prototype,
     ObjProto = Object.prototype;
-  var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null // @todo
+  var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null
 
+  // 更好地访问 core prototype 的变量
   var push = ArrayProto.push,
     slice = ArrayProto.slice,
     toString = ObjProto.toString,
     hasOwnProperty = ObjProto.hasOwnProperty
 
+  // ECMASCript 5的原生实现
   var nativeIsArray = Array.isArray,
     nativeKeys = Object.keys,
     nativeCreate = Object.create
 
-  var Ctor = function() {} // @todo
+  // 一个空函数，用来代替原型交换
+  var Ctor = function() {}
 
-  var _ = function(obj) { // @todo
+  // 创建一个 underscore 对象的引用，在下面会用来
+  var _ = function(obj) {
     if (obj instanceof _) return obj
     if (!(this instanceof _)) return new _(obj)
     this._wrapped = obj
   }
 
-  if (typeof exports != 'undefined' && !exports.nodeType) { // @todo
+  // 在Node.js中，export `_` 对象，用向后兼容旧 module API
+  // 在浏览器中，赋值 `_` 到全局对象
+  // `nodeType` 用来检测 `module`、`exports` 不是 HTML元素
+  if (typeof exports != 'undefined' && !exports.nodeType) {
     if (typeof module !== 'undefined' && !module.nodeType && module.exports) {
       exports = module.exports = _
     }
@@ -37,6 +49,7 @@
 
   _.VERSION = 'small dragon'
 
+  // 返回一个带有callback参数的函数，将会重复用到
   var optimizeCb = function(func, context, argCount) {
     if (context === void 0) return func
     switch (argCount) {
@@ -61,18 +74,23 @@
 
   var builtinIteratee
 
+  // 用来生成运用到数组中每一个元素，返回相应的结果的回调函数，可以是
+  // `identity`、一个任意的函数、一个 property matcher、一个 property 访问器
   var cb = function(value, context, argCount) {
     if (_.iteratee !== builtinIteratee) return _.iteratee(value, context)
     if (value == null) return _.identity
     if (_.isFunction(value)) return optimizeCb(value, context, argCount)
-    if (_is.Object(value) && !_isArray(value)) return _.matcher(value)
+    if (_.isObject(value) && !_.isArray(value)) return _.matcher(value)
     return _.property(value)
   }
 
+  // 迭代器 @todo
   _.iteratee = builtinIteratee = function(value, context) {
     return cb(value, context, Infinity)
   }
 
+  // 类似于ES6的 rest 
+  // 根据 startIndex，计算传入一个数组的 arguments
   var restArgs = function(func, startIndex) {
     // -1是因为总要有个rest参数
     startIndex = startIndex == null ? func.length - 1 : +startIndex
@@ -100,6 +118,7 @@
     }
   }
 
+  // 用来生成一个继承自prototype的对象，跨浏览器的`object.create`原生写法
   var baseCreate = function(prototype) {
     if (!_.isObject(prototype)) return {}
     if (nativeCreate) return nativeCreate(prototype)
@@ -109,12 +128,14 @@
     return result
   }
 
+  // 根据key来获取一个对象中的对象的value
   var shallowProperty = function(key) {
     return function(obj) {
       return obj == null ? void 0 : obj[key]
     }
   }
 
+  // 深度的shallowProperty函数，不断往前获取value，直到path.length层的value值
   var deepGet = function(obj, path) {
     var length = path.length
     for (var i = 0; i < length; i++) {
@@ -124,14 +145,15 @@
     return length ? obj : void 0
   }
 
+  // 判断是否一个collection是否应该以数组或者对象的方法被迭代
   var MAX_ARRAY_INDEX = Math.pow(2, 53) -
-    var getLength = shallowProperty('length')
+  var getLength = shallowProperty('length')
   var isArrayLike = function(collection) {
     var length = getLength(collection)
     return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX
   }
 
-  // CORNERSTONE
+  // CORNERSTONE，also known as 'forEach'
   _.each = _.forEach = function(obj, iteratee, context) {
     iteratee = optimizeCb(iteratee, context)
     var i, length
@@ -160,7 +182,7 @@
     return results
   }
 
-  var crearerReduce = function(dir) {
+  var createReduce = function(dir) {
     var reducer = function(obj, iteratee, memo, initial) {
       var keys = !isArrayLike(obj) && _.keys(obj),
           length = (keys || obj).length,
@@ -185,7 +207,7 @@
 
   _.reduce = _.foldl = _.inject = createReduce(1)
 
-  _.reduceRight = _.folder = createReduce(-1)
+  _.reduceRight = _.foldr = createReduce(-1)
 
   _.find = _.detect = function(obj, predicate, context) {
     var keyFinder = isArrayLike(obj) ? _.findIndex : _.findKey
@@ -217,7 +239,7 @@
     return true
   }
 
-  _some = _.any = function(obj, predicate, context) {
+  _.some = _.any = function(obj, predicate, context) {
     predicate = cb(predicate, context)
     var keys = !isArrayLike(obj) && _.keys(obj),
         length = (keys || obj).length
