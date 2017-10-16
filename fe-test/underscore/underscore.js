@@ -134,12 +134,14 @@
   // An internal function for creating a new object that inherits from another.
   var baseCreate = function(prototype) {
     if (!_.isObject(prototype)) return {};
-    if (nativeCreate) return nativeCreate(prototype);
+    // if (nativeCreate) return nativeCreate(prototype);
     Ctor.prototype = prototype;
     var result = new Ctor;
     Ctor.prototype = null;
     return result;
   };
+
+  _.baseCreate = baseCreate
 
   var shallowProperty = function(key) {
     return function(obj) {
