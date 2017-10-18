@@ -1,3 +1,5 @@
+// second writtern： 2017-10-18 11:38:30
+
 // IIFE: immediately-invoked-function-expression
 (function() {
 	// https://github.com/zhangxiang958/underscore-analysis/issues/1 这篇文章解释得很好
@@ -36,6 +38,7 @@
 		Ctor.prototype = null // 其实就是引用，Ctor.prototype设为null也不会影响result的原型
 		return result 
 	}
+	_.baseCreate = baseCreate
 
 	// 函数是第一对象
 	var _ = function(obj) {
@@ -44,6 +47,254 @@
 		this._wrapped = obj
 	}
 
+	// 在Node.js环境，用向后兼容旧module Api的方式导出 undersocre 对象
+	// 在浏览中，将 `_` 增加到全局对象中
+	// 用 `nodeType` 来确保 `module` 和 `nodeType` 不是 HTML元素
+	if (typeof exports != 'undefined' && !exports.nodeType) {
+		if (typeof module != 'undefined' &&!module.nodeType && module.exports) {
+			exports = module.exports = _
+		}
+		exports._ = _
+	} else {
+		root._ = _
+	}
 
+	_.VERSION = '1.8.3'
+
+	// 对函数内部的 this 进行硬绑定，因为 bind 函数会有兼容问题
+	// 另外，apply 方法在执行会比 call 方法慢得多，apply 方法在执行的时候需要对传进来的参数数组进行深拷贝：apply内部执行伪代码 
+	var optimizeCb = function (func, context, argCount) {
+		if (context === void 0) return func
+		switch(argCount) {
+			case 1: return function(value) {
+				return func.call(context, value)
+			}
+			case null:
+			case 3: return function(value, index, collection) {
+				return func.call(context, value, index, collection)
+			}
+			case 4: return function(accumulator, value, index, collection) {
+				return func.call(context, accumulator, value, index, collection)
+			}
+		}
+		return function() {
+			return func.apply(context, arguments)
+		}
+	}
+
+	var builtinIteratee
+
+	// 一个生成回调函数的内部函数，回调函数应用在数据集的每个元素，返回期待的结果
+	var cb = function(value, context, argCount) {
+		if (_.iteratee !== builtinIteratee) return _.iteratee(value, context)
+		if (value == null) return _.identity
+		if (_.isFunction(value)) return optimizeCb(value, context, argCount)
+		if (_.isObject(value) && !_.isArray(value)) return _.matcher(value)
+		return _.property(value)
+	}
+
+	_.itertaee = builtinIteratee = function(value, context) {
+		return cb(value, context, Infinity)
+	}
+
+	// 最后一个参数必须是回调函数rest参数，在startIndex之后的参数都要放在rest上
+	// 类似于ES6的 rest参数
+	var restArgs = function(func, stratIndex) {
+		
+		startIndex = startIndex == null ? func.length - 1 : +startIndex
+		return function() {
+			var length = Math.max(arguments.length - startIndex, 0),
+				rest = Array(length),
+				index = 0
+			for (; index < length; index++) {
+				rest[index] = arguments[index + startIndex]
+			}
+			switch (startIndex) {
+				case 0: return func.call(this, rest)
+				case 1: return func.call(this, arguments, rest)
+				case 2: return func.call(this, argument,arguments, rest)
+			}
+			var args = Array(startIndex + 1)
+			for (index = 0; index < startIndex; index++) {
+				args[index] = arguments[index]
+			}
+			args[startIndex] = rest
+			return func.apply(this, args)
+		}
+	}
+
+	// 获取{a:2}中a的值2
+	var shallowPerperty = function(key) {
+		return function(obj) {
+			return obj == null ? void 0 : obj[key]
+		}
+	}
+
+	// 获取{a:{b:2}}中的值2
+	var deepGet = function(obj, path) {
+		var length = path.length
+		for (var i = 0; i < length; i++) {
+			if (obj == null) return void 0
+			obj = obj[path[i]]
+		}
+		return length ? obj : void
+	}
+
+	// 辅助函数，决定是否一个集合是否应该作为一个数组被迭代，还是作为一个对象被迭代
+	// 也就是所谓的鸭子模型，所以我们在使用 underscore 集合元素模型的时候要避免传入拥有length
+	// 属性的对象，以免被当做数组使用
+	var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1
+	var getLength = shallowPerperty('length')
+	var isArrayLike = function(collection) {
+		var length = getLength(collection)
+		return typeof length == 'number' && length >= 0 && length <=MAX_ARRAY_INDEX
+	}
+
+	// 集合方法
+	// aks forEach，返回原对象
+	_.each = _.forEach = function(obj, iteratee, context) {
+		iteratee = optimizeCb(iteratee, context)
+		var i, length
+		if (isArrayLike(obj)) {
+			for (i = 0, length = obj.length; i < length; i++) {
+				iteratee(obj[i], i, obj)
+			}
+		} else {
+			var keys = _.keys(obj)
+			for (i = 0, length = keys.length; i < length; i++) {
+				iteratee(obj[keys[i]], keys[i], obj)
+			}
+		}
+		return obj
+	}
+
+	_.map = _.collect = function(obj, iteratee, context) {
+		iteratee = cb(iteratee, context)
+		var keys = !isArrayLike(obj) && _.keys(obj),
+			length = (keys || obj).length,
+			results = Array(length)
+		for (var index = 0; index < length; index++) {
+			var currentKey = keys ? keys[index] : index
+			result[index] = iteratee(obj[currentKey], currentKey, obj)
+		}
+		return results
+	}
+
+	var createReduce = function(dir) {
+		var reducer = function(obj, iteratee, memo, initial) {
+			var keys = !isArrayLike(obj) && _.keys(obj),
+				length = (keys || obj).length,
+				index = dir > 0 ? 0 : length - 1
+			if (!initial) {
+				memo = obj[keys ? keys[index] : index]
+				index += dir
+			}
+			for (; index >= 0 && index < length; index += dir) {
+				var currrentKeu = keys ? keys[index] : index
+				memo = iteratee(memo, obj[currentKey], currentKey, obj)
+			}
+			return memo
+		}
+
+		return function(obj, iteratee, memo, context) {
+			var initial = arguments.length >= 3
+			return reducer(obj, optimizeCb(iteratee, context, 4), memo, initial)
+		}
+	}
+
+	// 等同于Array.reduce函数
+	_.reduce = _.foldl = _.inject = createReduce(1)
+	// 反方向的Array.reduce函数
+	_.reduceRight = _.folder = createReduce(-1)
+
+	// 返回第一个通过真值检测的值
+	_.find = _.detect = function(obj, predicate, context) {
+		var keyFinder = isArrayLike(obj) ? _.findIndex : _.findKey
+		var key = keyFinder(obj, predicate, context)
+		if (key !== void 0 && key !== -1) return obj[key]
+	}
+	
+	// 返回所有通过真值检测是项
+	_.filter = _.select = function(obj, predicate, context) {
+		var results = []
+		predicate = cb(predicate, context)
+		_.each(obj, function(value, index, list)) {
+			if (predicate(value, index, list)) results.push(value)
+		})
+		return results
+	}
+
+	// 返回所有不通过真值检测的值
+	_.reject = function(obj, predicate, context) {
+		return _.filter(obj, _.negate(cb(predicate, context)), context)
+	}
+	
+	// 判断是否所有项都通过真值检测
+	_.every = _.all = function(obj, predicate, context) {
+		predicate = cb(predicate, context)
+		var keys = !isArrayLike(obj) && _.keys(obj),
+			length = (keys || obj).length
+		for (var index = 0; index < length; index++) {
+			var currentKey = keys ? keys[index] : index
+			if (!predicate(obj[currentKey], currentKey, obj)) return false
+		}
+		return true
+	}
+
+	// 判断是否有子项通过真值检测
+	_.some = _.any = function(obj, predicate, context) {
+		predicate = cb(predicate, context)
+		var keys = !isArrayLike(obj) && _.keys(obj),
+			length = (keys || obj).length
+		for (var index = 0; index < length; index++) {
+			var currentKey = keys ? keys[index] : index
+			if (predicate(obj[currentKey], currentKey, obj)) return true
+		}
+		return false
+	}
+
+	// 判断是否对象/数组中包含指定项目
+	_.contains = _.includes = _.include = function(obj, item, fromIndex, guard) {
+		if (!isArrayLike(obj)) obj = _.values(obj)
+		if (typeof fromIndex != 'number' || guard) fromIndex = 0
+		return _.indexOf(obj, item, fromIndex) >= 0
+	}
+
+	// 在每个项调用带有参数的方法，作用和map差不多
+	_.invoke = restArgs(function(obj, path, args) {
+		var contextPath, func
+		if (_.isFunction(path)) {
+			func = path
+		} else if (_.isArrray(path)) {
+			contextPath = path.slice(0, -1)
+			path = path[path.length - 1]
+		}
+		return _.map(obj, function(context) {
+			var method = func
+			if (!method) {
+				if (contextPath && contextPath.length) {
+					context = deepGet(context, contextPath)
+				}
+				if (context == null) return void 0
+				method = context[path]
+			}
+			return method == null ? method : method.apply(context, args)
+		})
+	})
+
+	// 返回取出每个项中的属性值的数组
+	_.pluck = function(obj, key) {
+		return _.map(obj, _.property(key))
+	}
+
+	// 返回包含`key:value`对的项
+	_.where = function(obj, atrrs) {
+		return _.filter(obj, _.matcher(attrs))
+	}
+
+	// 返回包含`key:value`对的索引
+	_.findWhere = function(obj, attrs) {
+		return _.find(obj, _.matcher(attrs))
+	}
 
 })
