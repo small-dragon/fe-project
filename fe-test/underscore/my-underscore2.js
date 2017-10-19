@@ -1,4 +1,5 @@
 // second writtern： 2017-10-18 11:38:30
+// third writtern: 2017-10-19 09:02:42
 
 // IIFE: immediately-invoked-function-expression
 (function() {
@@ -16,19 +17,24 @@
 		return this
 	}
 
+	// 方便压缩，也方便书写
 	var ArrayProto = Array.prototype, objPrototype = Object.prototype
 	var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null
 
+	// 方便访问
 	var push = ArrayProto.push,
 			slice = ArrayProto.slice,
 			toString = ObjProto.toString
 			hasOwnProperty = ObjProto.hasOwnProperty
 
+	// ES5 原生实现方法
 	var nativeIsArray = Array.isArray,
 			nativeKeys = Object.keys
 	
+	// 空函数，用来代理原型交换
 	var Ctor = function(){}
 
+	// 兼容的 Object.create写法
 	var nativeCreate = Object.create // 记不得里面的函数原理
 	var baseCreate = function(prototype) {
 		if (!_isObject(prototype)) return {}
@@ -100,7 +106,6 @@
 	// 最后一个参数必须是回调函数rest参数，在startIndex之后的参数都要放在rest上
 	// 类似于ES6的 rest参数
 	var restArgs = function(func, stratIndex) {
-		
 		startIndex = startIndex == null ? func.length - 1 : +startIndex
 		return function() {
 			var length = Math.max(arguments.length - startIndex, 0),
@@ -296,5 +301,134 @@
 	_.findWhere = function(obj, attrs) {
 		return _.find(obj, _.matcher(attrs))
 	}
+
+	// 根据迭代函数的计算逻辑算出集合最大值
+	_.max = function(obj, iteratee, context) {
+		var result = -Infinity, lastComputed = -Infinity,
+			value, computed
+		if (iteratee == null || (typeof iteratee == 'number' && typeof obj[0] != 'object') && obj != null) {
+			obj = isArrayLike(obj) ? obj : _.values(obj)
+			for (var i = 0, length = obj.length; i < length; i++) {
+				value = obj[i]
+				if (value != null && value > result) {
+					result = value
+				}
+			}
+		} else {
+			iteratee = cb(iteratee, context)
+			_.each(obj, function(v, index, list) {
+				computed = itertaee(v, index, list)
+				if (computed > lastComputed || computed === -Infinity && result === -Infinity) {
+					result = v
+					lastComputed = computed
+				}
+			})
+		}
+		return result
+	}
+
+	// 根据迭代函数的计算逻辑算出集合最小值
+	_.min = function(obj, itertaee, context) {
+		var result = Infinity, lastComputed = Infinity,
+			value, computed
+		if (iteratee == null || (typeof iteratee == 'number' && typeof obj[0] != 'object') && obj != null) {
+			obj = isArrayLike(obj) ? obj : _.values(obj)
+			for (var i = 0, length = obj.length; i < length; i++) {
+				value = obj[i]
+				if (value != null && value < result) {
+					result = value
+				}
+			}
+		} else {
+			iteratee = cb(itertaee, context)
+			_.each(obj, function(v, index, list) {
+				computed = iteratee(v, index, list)
+				if (computed < lastComputed || computed === Infinity && result === Infinity) {
+					result = v
+					lastComputed = computed
+				}
+			})
+		}
+		return result
+	}
+
+	// 洗牌，即打乱一个集合的顺序
+	_.shuffle = function(obj) {
+		return _.sample(obj, Infinity)
+	}
+
+	// n为空时，等于_.random;n不为空，打乱集合顺序并从中区n个值的集合
+	// 乱序不要用 sort + Math.random()，复杂度O(nlogn)
+	_.sample = function(obj, n, guard) {
+		if (n == null || guard) {
+			if (!isArrayLike(obj)) obj = _.values(obj)
+				return obj[_.random(obj.length - 1)]
+		}
+		// _.clone(obj) 其实就是 obj，没什么意义
+		var sample = isArrayLike(obj) ? _.clone(obj) : _.values(obj)
+		var length = getLength(sample)
+		n = Math.max(Math.min(n, length), 0)
+		var last = length - 1
+		for (var index = 0; index < n; index++) {
+			var rand = _.random(index, last)
+			var temp = sample[index]
+			sample[index] = sample[rand]
+			sample[rand] = temp
+		}
+		return sample.slice(0, n)
+	}
+
+	// 根据迭代函数来为集合排序
+	_.sortBy = function(obj, iteratee, context) {
+		var index = 0
+		iteratee = cb(iteratee, context)
+		return _.pluck(_.map(obj, function(value, key, list) {
+			return {
+				value: value,
+				index: index++,
+				criteria: iteratee(value, key, list)
+			}
+		}).sort(function(left, right) {
+			var a = left.criteria
+			var b = right.criteria
+			if (a !== b) {
+				if (a > b || a === void 0) return 1
+				if (a < b || b === void 0) return -1
+			}
+			return left.index - right.index
+		}), 'value')
+	}
+
+	// 用来集合 `group by`操作的函数
+	var group = function(behavior, partition) {
+		return function(obj, iteratee, context) {
+			var result = partition ? [[], []] : {}
+			iteratee = cb(iteratee, context)
+			_.each(obj, function(value, index) {
+				var key = iteratee(value, index, obj)
+				behavior(result, value, key)
+			})
+			return result
+		}
+	}
+
+	// 根据迭代函数为集合分组，迭代函数可以为函数，也可为字符串
+	_.groupBy = group(function(result, value, key) {
+		if (_.has(result, key)) result[key].push(value)
+		else result[key] = [value]
+	})
+
+	// 类似于 `_.groupBy`，但索引将是唯一的
+	_.indexBy = group(function(result, value, key) {
+		result[key] = value
+	})
+  	
+  	// 根据迭代函数为集合分组，返回包含每个分组数量的数组
+	_.countBy = group(function(result, value, key) {
+		if (_.has(result, key)) result[key]++
+		else result[key] = 1
+	})
+
+	
 
 })
