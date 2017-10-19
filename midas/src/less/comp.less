@@ -1,0 +1,64 @@
+// 自定义alert组件样式
+.pop-alert {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    width: 20rem;
+    z-index: 100;
+    margin: auto;
+    background-color: rgba(0,0,0,.5);
+    .con {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 15.86rem;
+        padding: 1.25rem 1.5rem;
+        transform: translate(-50%, -50%);
+        font-size: .7467rem;
+        color: #666;
+        background-color: white;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        line-height: 1.2rem;
+    }
+    .info {
+        margin-bottom: 1.8rem;
+        width: 100%;
+    }
+    .alert-btn {
+        color: #00cc66;
+        letter-spacing: .3em;
+    }
+}
+
+// 仿安卓toast样式
+.PopMessage {
+    position: fixed;
+    z-index: 99999 !important;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    overflow-x: hidden;
+    color: white;
+    text-align: center;
+
+    .container{
+        height: 30px;
+        display: flex;
+        align-items: center;
+        font-size: 12px;
+        border-radius: 5px;
+        color: #666;
+        padding: 0 14px;
+        border: 1px solid #f2c973;
+        background-color: #f9eebc;
+    }
+    animation: fadeIn 0.5s linear 1;
+    &.removeing {
+         animation: fadeout 0.5s linear 1;
+    }
+}

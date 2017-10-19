@@ -1,0 +1,74 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-size: inherit;
+    vertical-align: baseline;
+    background: transparent;
+}
+ol, ul {
+    list-style: none;
+}
+/* remember to define focus styles! */
+:focus {
+    outline: 0;
+}
+/* tables still need 'cellspacing="0"' in the markup */
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+a,a:link,a:visited,a:active {
+    text-decoration: none;
+    color: inherit;
+}
+a:hover {
+    color: inherit;
+    cursor: pointer;
+}
+img,object,video,embed {
+    max-width: 100%;
+}
+a img {
+    border: none;
+}
+label {
+    font-weight: normal;
+}
+body, input, button, select, input, textarea {
+    font-family: microsoft yahei, arial, sans-sarif;
+    font-size: 16px;
+    color: black;
+    background: white;
+}
+input, select {
+    border: 1px solid rgb(164,164,164); 
+    padding: 0;
+}
+html,
+body {
+    height: 100vh;
+    -webkit-user-select: none;
+    -webkit-text-size-adjust: 100%;
+    font-family: '微软雅黑',Arial, Helvetica, sans-serif;
+    -webkit-overflow-scrolling: touch;
+}
+
+// ios百度地图bug
+iframe {
+    display: none;
+}
+
+.clearfix:after {
+    content: ".";
+    clear: both;
+    visibility: hidden;
+    display: block;
+    height: 0;
+    overflow: hidden;
+}
+
+.no-pointer {
+    pointer-events: none;
+}

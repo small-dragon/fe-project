@@ -1,0 +1,65 @@
+.v-m-l-zhuti {
+
+    .tabs {
+        display: flex;
+        border-bottom: 1px solid #eee;
+
+        .tab {
+            flex: 1;
+            margin: 0 5px;
+            padding: 0 5px 5px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            font-size: 12px;
+
+            span {
+                margin-top: 10px;
+            }
+
+            &.on {
+                border-bottom: 2px solid #4da1ff;
+
+                i.type {
+                    background-image: url(~images/main/type_dark.png);
+                }
+
+                i.color {
+                    background-image: url(~images/main/color_dark.png);
+                }
+
+                i.brick {
+                    background-image: url(~images/main/brick_dark.png);
+                }
+
+                i.ruler {
+                    background-image: url(~images/main/ruler_dark.png);
+                }
+
+            }
+
+            i {
+                display: inline-block;
+                width: 24px;
+                height: 24px;
+                background: no-repeat center center / 100% 100%;
+            }
+        }
+
+        i.type {
+            background-image: url(~images/main/type_light.png);
+        }
+
+        i.color {
+            background-image: url(~images/main/color_light.png);
+        }
+
+        i.brick {
+            background-image: url(~images/main/brick_light.png);
+        }
+
+        i.ruler {
+            background-image: url(~images/main/ruler_light.png);
+        }
+    }
+}

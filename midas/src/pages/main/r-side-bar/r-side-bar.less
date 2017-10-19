@@ -1,0 +1,70 @@
+.v-m-r {
+	position: absolute;
+	top: 51px;
+	right: 0;
+	bottom: 0;
+	width: 195px;
+	background-color: white;
+	overflow-y: auto;
+	z-index: 3;
+
+	.sec {
+		padding: 28px;
+		border-bottom: 1px solid #eee;
+		cursor: pointer;
+		position: relative;
+
+		&.on {
+			&:before {
+				border-left: 2px solid #4da1ff;
+			}
+			.radio {
+                background-image: url(~images/common/check-on.png)
+            }
+		}
+
+		.radio {
+			display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-right: 12px;
+            background: url(~images/common/check.png) no-repeat center center / 100% 100%;
+        }
+
+		&:before {
+			content: '';
+			position: absolute;
+			top: 28px;
+			bottom: 28px;
+			left: 0;
+			border-left: 2px solid white;
+			transition: all .3s ease;
+		}
+
+		.t {
+			font-size: 16px;
+			color: #333;
+			margin-bottom: 18px;
+			font-weight: normal;
+		}
+
+		.info {
+			position: relative;
+			font-size: 12px;
+			line-height: 2;
+			color: #666;
+			padding-left: 18px;
+
+			&:before {
+				content: '';
+				position: absolute;
+				left: 0;
+				top: 8px;
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				background-color: #4ca1ff;
+			}
+		}
+	}
+}
