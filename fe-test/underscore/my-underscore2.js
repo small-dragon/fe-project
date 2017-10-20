@@ -1,5 +1,6 @@
 // second writtern： 2017-10-18 11:38:30
 // third writtern: 2017-10-19 09:02:42
+// fourth written: 2017-10-20 09:00:06
 
 // IIFE: immediately-invoked-function-expression
 (function() {
@@ -23,13 +24,13 @@
 
 	// 方便访问
 	var push = ArrayProto.push,
-			slice = ArrayProto.slice,
-			toString = ObjProto.toString
-			hasOwnProperty = ObjProto.hasOwnProperty
+		slice = ArrayProto.slice,
+		toString = ObjProto.toString
+		hasOwnProperty = ObjProto.hasOwnProperty
 
 	// ES5 原生实现方法
 	var nativeIsArray = Array.isArray,
-			nativeKeys = Object.keys
+		nativeKeys = Object.keys
 	
 	// 空函数，用来代理原型交换
 	var Ctor = function(){}
@@ -195,7 +196,7 @@
 				index += dir
 			}
 			for (; index >= 0 && index < length; index += dir) {
-				var currrentKeu = keys ? keys[index] : index
+				var currrentKey = keys ? keys[index] : index
 				memo = iteratee(memo, obj[currentKey], currentKey, obj)
 			}
 			return memo
@@ -429,6 +430,298 @@
 		else result[key] = 1
 	})
 
+	// 将传的各种类型值返回数组
+	var reStrSymbol = /[^\ud800-\udfff][\ud800-\udbff][\udc00-\udff][\ud800-\udfff]/g
+	_.toArray = function(obj) {
+		if (!obj) return []
+		if (_.isArray(obj)) return slice.call(obj)
+		if (_.isString(obj)) {
+			return obj.match(reStrSymbol)
+		}
+		if (isArrayLike(obj))  return _.map(obj, _.identity)
+		return _.values(obj)
+	}
+
+	// 返回集合的大小
+	_.size = function(obj) {
+		if (obj == null) return 0
+		return isArrayLike(obj) ? obj.length : _.keys(obj).length
+	}
+
+	// 根据 predicate 函数的值来生成包含两个半区的数组
+	_.partition = group(function(result, value, pass) {
+		result[pass ? 0 : 1].push(value)
+	}, true)
+
+
+	// 操作数组的函数
 	
+	// 获取数组的第一个项;如果传`n`参数，获取数组的前n个项
+	_.first = _.head = _.take = function(array, n, guard) {
+		if (array == null || array.length < 1) return void 0
+		if (n == null || guard) return array[0]
+		return _.initial(array, array.length - n)
+	}
+
+	// 返回除最后项的数组;如果传`n`参数，返回除最后n项的数组
+	_.initial = function(array, n, guard) {
+		return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)))
+	}
+
+	// 返回数组的最后n项
+	_.last = function(array, n, guard) {
+		if (array == null || array.length < 1) return void 0
+		if (n == null || guard) return array[array.length - 1]
+		return _.rest(array, Math.max(0, array.length - n))
+	}
+
+	// 返回数组从n开始的剩余项
+	_.rest = _.tail = _.drop = function(array, n, guard) {
+		return slice.call(array, n == null || guard ? 1 : n)
+	}
+
+	// 去除数组中真值检测为false的值
+	_.compact = function(array) {
+		return _.filter(array, Boolean)
+	}
+
+	// flatten：变平、shallow：使变浅、变薄 
+	// shallow为false时只将一维、strict为true只保留降维的项
+	var flatten = function(input, shallow, strict, output) {
+		output = output || []
+		var idx = output.length
+		for (var i = 0, length = getLength(input); i < length; i++) {
+			var value = input[i]
+			if (isArrayLike(value) && (_.isArray(value) || _.isArguments(value))) {
+				if (shallow) {
+					var j = 0, len = value.length
+					while(j < len) output[idx++] = value[j++]
+				} else {
+					flatten(value, shallow, strict, output)
+					idx = output.length
+				}
+			} else if (!strict) {
+				output[idx++] = value
+			}
+		}
+		return output
+	}
+
+	// 对数组降维，根据shallow值来判断降一维还是多维
+	_.flatten = function(array, shallow) {
+		return flatten(array, shallow, false)
+	}
+
+	// 返回不符合指定项的数组项
+	_.without = restArgs(function(array, otherArrays) {
+		return _.difference(array, otherArrays)
+	})
+
+	// 返回数组中每项进行迭代函数后都不相同的数组
+	_.uniq = _.unique = function(array, isSorted, iteratee, context) {
+		if (!_.isBoolean(isSorted)) {
+			context = iteratee
+			iteratee = isSorted
+			isSorted = false
+		}
+		if (iteratee != null) iteratee = cb(iteratee, context)
+		var result = []
+		var seen = [] // 根据迭代函数生成的数组，用来判断是否重复
+		for (var i = 0, length = getLength(array); i < length; i++) {
+			var value = array[i],
+				computed = iteratee ? iteratee(value, i , array) : value
+			if (isSorted) {
+				if (!i || seen !== computed) result.push(value)
+				seen = computed
+			} else if (iteratee) {
+				if (!_contains(seen, computed)) {
+					seen.push(computed)
+					result.push(value)
+				}
+			} else if (!_contains(result, value)) {
+				result.push(value)
+			}
+		}
+		return value
+	}
+
+	// 返回多个数组的并集
+	_.union = restArgs(function(arrays) {
+		return _.uniq(flatten(arrays, true, true))
+	})
+
+	// 返回多个数组的交集
+	_.intersection = function(array) {
+		var result = []
+		var argsLength = arguments.length
+		for (var  i = 0, length = getLength(array); i < length; i++) {
+			var item = array[i]
+			if (_.contains(result, item)) continue
+			for (var j = 1; j < args.length; j++) {
+				if (!_.contains(arguments[j], item)) break
+			}
+			if (j === argsLength) result.push(item)
+		}
+		return result
+	}
+
+	// 返回一个数组和其他数组都不相同的项
+	_.difference = restArgs(function(array, rest) {
+		rest = faltten(rest, true, true)
+		return _.filter(array, function(value) {
+			return !_.contains(rest, value)
+		})
+	})
+
+	var createPredicateIndexFinder = function(dir) {
+		return function(array, predicate, context) {
+			predicate = cb(predicate, context) {
+				var length = getLength(array)
+				var index = dir > 0 ? 0 : length - 1
+				for (; index >= 0 && index < length; index += dir) {
+					if (predicate(array[index, index, array])) return index
+				}
+			}
+			return -1
+		}
+	}
+
+	// 正向/反向遍历数组，返回满足真值检测的索引，都不满足则返回-1
+	_.findIndex = createPredicateIndexFinder(1)
+	_.findLastIndex  = createPredicateIndexFinder(-1)
+
+	// 根据二元搜索法来判断插入的值应该处于数组的哪个位置
+	_.sortedIndex = function(array, obj, iteratee, context) {
+		iteratee = cb(iteratee, context, 1)
+		var value = itertaee(obj)
+		var low = 0, high = getLength(array)
+		while (low < high) {
+			var mid = Math.floor(( low + high ) / 2)
+			if (iteratee(array[mid]) < value) low = mid + 1
+			else high = mid
+		}
+	}
+
+	// idx从哪开始查找
+	var createIndexFinder = function(dir, predicateFind, sortedIndex) {
+		return function(array, item, idx) {
+			var i = 0, length = getLength(array)
+			if (typeof idx == 'number') {
+				if (dir > 0) {
+					i = idx >= 0 ? idx : Math.max(idx + length, i)
+				}
+			} else if (sortedIndex && idx && length) {
+				idx = sortedIndex(array, item)
+				return array[idx] === item ? idx : -1
+			}
+			if (item !== item) { // 如果Item时候NaN
+				idx = predicateFind(slice.call(array, i, length), _.isNaN)
+				return idx >= 0 ? idx + i : -1
+			}
+			for (idx = dir > 0 ? i : length - 1; idx >= 0 && idx < length; idx += dir) {
+				if (array[idx] == item) return idx
+			}
+			return -1
+		}
+	}
+
+	// 查找数组中出现某项的第一个索引
+	_.indexOf = createIndexFinder(1, _.findIndex, _.sortedIndex)
+	_.lastIndexOf = createIndexFinder(-1, _.findLastIndex)
+	
+	// 生成一个根据算法递增/减的证书数组
+	_.range = function(start, stop, step) {
+		if (stop == null) {
+			stop = start || 0
+			start = 0
+		}
+		if (!step) {
+			step = stop < start ? -1 : 1
+		}
+
+		var length = Math.max(Math.ceil((stop - start) / step), 0)
+		var range = Array(length)
+
+		for (var idx = 0; idx < length; idx++, start += step) {
+			range[idx] = start
+		}
+
+		return range
+	}
+
+	// 将一个数组分为好几份`count`项的数组
+	_.chuck = function(array, count) {
+		if (count == null || count < 1) return []
+		var result = []
+		var  i = 0, length = arrar.length
+		while (i < length) {
+			result.push(slice.call(array, i, i+=count))
+		}
+		return result
+	}
+
+	// 操作函数的函数
+
+	// 决定是否执行一个函数作为构造器还是一个带有参数的正常函数
+	var executeBound = function(sourceFunc, boundFunc, context, callingContext, args) {
+		if (!(callingContext instanceof boundFunc)) return sourceFunc.apply(context, args)
+		var self = baseCreate(sourceFunc.prototype)
+		var result = sourceFunc.apply(self, args)
+		if (_.isObject(result)) return result
+		return self
+	} 
+
+	// 和ES5的bind用法一样
+	_.bind = restArgs(function(func, context, args) {
+		if (!_.isFunction(func)) throw new TypeError('Bind must be called on a function')
+		var bound  = restArgs(function(callArgs) {
+			return executeBound(func, bound, context, this, args.concat(callArgs))
+		})
+		return bound
+	})
+
+	// 如果传入的是_，则这个位置先空着，等待手动填入
+	_.partial = restArgs(function(func, boundArgs) {
+		var placeholder = _.partial.placeholder
+		var bound = function() {
+			var position = 0, length = boundArgs.length
+			var args = Array(length)
+			for (var i = 0; i < length; i++) {
+				args[i] = boundArgs[i] === placeholder ? arguments[position++] : boundArgs[i]
+			}
+			while (position < arguments.length) args.push(arguments[position++])
+			return executeBound(func, bound, this, this, args)
+		}
+	})
+
+	_.partial.placeholder = _
+
+	// 用来缓存一个耗时较长函数的结果
+	_.memoize = function(func, hasher) {
+		var memoize = function(key) {
+			var cache = memoize.cache
+			var address = '' + (hasher ? hasher.apply(this, arguments) : key)
+			if (!_.has(cache, address)) cache[address] = func.apply(this, arguments)
+			return cache[address]
+		}
+		memoize.cache = {}
+		return memoize
+	}
+
+	// 延迟一个函数的执行
+	_.delay = restArgs(function(func, wait, args) {
+		return setTimeout(function() {
+			return func.apply(null, args)
+		}, wait)
+	})
+
+	// 推迟一个函数的执行，将它调度到当前调用栈结束后执行
+	_.defer = _.partial(_.delay, _, 1)
+
+	_.throttle = function(func, wait, option) {
+		var timeout, context, args, result 
+		var previous = 0
+		if (!options) options = {}
+	}
 
 })
