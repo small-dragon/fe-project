@@ -1,0 +1,130 @@
+.v-m-l-xiguan {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 91px;
+    bottom: 0;
+    overflow: hidden;
+
+    .list-item {
+        display: inline-block;
+        margin-right: 10px;
+    }
+    .list-enter-active, .list-leave-active {
+        transition: all 1s;
+    }
+    .list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
+        opacity: 0;
+    }
+
+    .s-wrap {
+        flex: 1;
+    }
+
+    .section {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+
+        .comp-smallColumn {
+            position: absolute;
+            bottom: 100px;
+            top: 80px;
+            width: 100%;
+            overflow-y: auto;
+        }
+    }
+    
+    .items {
+        display: flex;
+        flex-wrap: wrap;
+        // border-bottom: 1px solid #eee;
+    }
+
+    .item {
+        margin-top: 10px;
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 12px;
+
+        .figure {
+            max-width: 30px;
+            height: 55px;
+            margin-bottom: 15px;
+        }
+        
+        .name {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .radio {
+            width: 17px;
+            height: 17px;
+            margin-bottom: 15px;
+            background: url(~images/common/check.png) no-repeat center center / 100% 100%;
+        }
+
+        &.on {
+            .radio {
+                background-image: url(~images/common/check-on.png)
+            }
+        }
+    }
+
+    .btn-ok {
+        margin: 0 auto;
+        position: fixed;
+        left: 60px;
+        bottom: 30px;
+    }
+
+    .btn-sec {
+        display: flex;
+        justify-content: center;
+        padding: 20px 0;
+        cursor: pointer;
+
+        img {
+            width: 32px;
+            height: 32px;
+        }
+    }
+
+    .sec-tabs {
+        display: flex;
+
+        .sec-tab {
+            font-size: 12px;
+            flex: 1;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding: 5px 0;
+            cursor: pointer;
+
+            &.on {
+                border-bottom: 2px solid #4da1ff;
+            }
+
+            span {
+                position: relative;
+                padding-left: 15px;
+
+                &:before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    top: 4px;
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background-color: #4ca1ff;
+                }
+            }
+        }
+    }
+}

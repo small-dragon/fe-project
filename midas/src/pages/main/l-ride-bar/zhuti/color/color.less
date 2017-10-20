@@ -1,0 +1,41 @@
+.v-m-l-z-color {
+    margin-top: 15px;
+
+    .item {
+        margin-top: 30px;
+        font-size: 12px;
+        margin-left: 26px;
+        display: flex;
+        align-items: center;
+
+        .name {
+            width: 3em;
+            margin-right: 20px;
+        }
+
+        .color {
+            width: 55px;
+            height: 21px;
+            background-color: black;
+            box-shadow: 0 2px 5px black;
+            margin-right: 20px;
+            border-radius: 2px;
+        }
+
+        .check {
+            width: 17px;
+            height: 17px;
+            background: url(~images/common/check.png) no-repeat center center / 100% 100%;
+        }
+
+        &.on {
+            .check {
+                background-image: url(~images/common/check-on.png);
+            }
+        }
+    }
+
+    .btn-ok {
+        margin-top: 68px;
+    }
+}
