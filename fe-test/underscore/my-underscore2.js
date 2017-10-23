@@ -1,6 +1,7 @@
 // second writtern： 2017-10-18 11:38:30
 // third writtern: 2017-10-19 09:02:42
 // fourth written: 2017-10-20 09:00:06
+// fifth written: 2017-10-23 14:09:15
 
 // IIFE: immediately-invoked-function-expression
 (function() {
@@ -174,6 +175,7 @@
 		return obj
 	}
 
+	// 返回对集合进行迭代函数后的结果数组
 	_.map = _.collect = function(obj, iteratee, context) {
 		iteratee = cb(iteratee, context)
 		var keys = !isArrayLike(obj) && _.keys(obj),
@@ -358,7 +360,7 @@
 		return _.sample(obj, Infinity)
 	}
 
-	// n为空时，等于_.random;n不为空，打乱集合顺序并从中区n个值的集合
+	// n为空时，等于_.random;n不为空，打乱集合顺序并从中取n个值的集合
 	// 乱序不要用 sort + Math.random()，复杂度O(nlogn)
 	_.sample = function(obj, n, guard) {
 		if (n == null || guard) {
@@ -575,12 +577,11 @@
 
 	var createPredicateIndexFinder = function(dir) {
 		return function(array, predicate, context) {
-			predicate = cb(predicate, context) {
-				var length = getLength(array)
-				var index = dir > 0 ? 0 : length - 1
-				for (; index >= 0 && index < length; index += dir) {
-					if (predicate(array[index, index, array])) return index
-				}
+			predicate = cb(predicate, context)
+			var length = getLength(array)
+			var index = dir > 0 ? 0 : length - 1
+			for (; index >= 0 && index < length; index += dir) {
+				if (predicate(array[index, index, array])) return index
 			}
 			return -1
 		}
@@ -625,7 +626,7 @@
 		}
 	}
 
-	// 查找数组中出现某项的第一个索引
+	// 查找数组中出现某项的第一个索引，和findIndex类似，但IndexOf在遇到排序大数组时的用处真显著
 	_.indexOf = createIndexFinder(1, _.findIndex, _.sortedIndex)
 	_.lastIndexOf = createIndexFinder(-1, _.findLastIndex)
 	
@@ -718,10 +719,192 @@
 	// 推迟一个函数的执行，将它调度到当前调用栈结束后执行
 	_.defer = _.partial(_.delay, _, 1)
 
-	_.throttle = function(func, wait, option) {
-		var timeout, context, args, result 
+	_.throttle = function(func, wait, options) {
+		var timeout, context, args, result
 		var previous = 0
-		if (!options) options = {}
+		if (!options) options= {}
+
+		var later = function() {
+			previous = options.leading === false ? 0 : _.now()
+			timeout = null
+			result = func.apply(context, args)
+			// 这里的timeout一定是null了吧，检测是为了递归调用，产生新的timeout
+			if (!timeout) context = args = null 
+		}
+
+		// 返回一个函数，在一个给定的wait时间内最多调用一次
+		// 正常情况下，缓冲函数尽它可能多执行，但在一个`wait`期间最能调用一次
+		// 不想在`wait`期间的一开始就执行，传 `{leading:false}`
+		// 最后一次回调不会被触发，传`{trailing:false}`
+		var throttled = function() {
+			var now = _.now()
+			if (!previous && options.leading === false) previous = now
+			var remaining = wait - (now - previous)
+			context = this
+			args = arguments
+			// remaning > wait，则表示客户端时间被调整过 
+			if (remaining <= 0 || remaining > wait) {
+				if (timeout) {
+					clearTimeout(timeout)
+					timeout = null
+				}
+				previous = now
+				result = func.apply(context, args)
+				if (!timeout) context = args = null
+			} else if (!timeout && options.trailing !== false) {
+				timeout = setTimeout(later, remaining)
+			}
+			return result
+		}
+
+		throttled.cancel = function() {
+			clearTimeout(timeout)
+			previous = 0
+			timeout = context = args = null
+		}
+
+		return throttled
 	}
+
+	// 只有当函数不被调用时，它才会被触发
+	// 函数将触发在没在`N`ms被调用
+	// 如果想立即触发，传递`immediate`参数
+	_.debounce = function(func, wait, immediate) {
+		var timrout, result
+
+		var later = function(context, args) {
+			timeout = null
+			if (args) result = func.apply(context, args)
+		}
+
+		var debounced = restArgs(function(args) {
+			if (timeout) clearTimeout(timeout)
+			if (immediate) {
+				var callNow = !timeout
+				timeout = setTimeout(later, wait)
+				if (callNow) result = func.apply(this, args)
+			} else {
+				timeout = _.delay(later, wait, this, args)
+			}
+
+			return result
+		})
+
+		debounced.cancel = function() {
+			clearTimeout(timeout)
+			timeout = null
+		}
+
+		return debounced
+	}	
+
+	// 将一个函数作为第二个函数的参数
+	_.wrap = function(func, wrapper) {	
+		return _.partial(wrapper, func)
+	}
+
+	// 返回真值函数的否定版本
+	_.negate = function(predicate) {
+		return function() {
+			return !predicate.apply(this, arguments)
+		}
+	}
+
+	// 复合函数，将一个函数执行之后的结果再作为参数赋给下一个函数来执行
+	_.compose = function() {
+		var args = arguments
+		var start = args.length - 1
+		return function() {
+			var i = start
+			var result = args[start].apply(this, arguments)
+			while(i--) result = args[i].call(this, result)
+			return result
+		}
+	}
+
+	// 第N次和N次之后调用才会执行
+	_.after = function(times, func) {
+		return function() {
+			if (--times < 1) {
+				return func.apply(this, arguments)
+			}
+		}
+	}
+
+	// 函数调用不大于N次，大于等于N次将返回上次的结果
+	_.before = function(times, func) {
+		var memo
+		return function() {
+			if (--times > 0) {
+				memo = func.apply(this, arguments)
+			}
+			if (times <= 1) func = null
+			return memo
+		}
+	}
+
+	// 只执行一次的函数
+	_.once = _.partial(_.before, 2)
+
+	_.restArgs = restArgs
+
+	// 操作对象的函数
+	
+
+	// IE9的bug，改写了原型的属性后，用for..in遍历不到该属性
+	var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString')
+	var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString',
+		'propertyIsEnumerable', 'hasOwnProperty', 'toLocalString']
+
+	var collectNomEnumProps = function(obj, keys) {
+		var nonEnumIdx = nonEnumerableProps.length
+		var constructor = obj.constructor
+		var proto = _.isFunction(constructor) && constructor.prototype || ObjProto
+		
+		var prop = 'constructor'
+		if (_.has(obj, prop) && !_.contains(keys, prop)) keys.push(prop)
+
+		while (nonEnumIdx--) {
+			prop = nonEnumerableProps[nonEnumIdx]
+			if (prop in obj && obj[prop] !== proto[prop] && !_.contains(keys, prop)) {
+				keys.push(prop)
+			}
+		} 
+	}
+
+
+	// 返回只在实例上的属性
+	_.keys = function(obj) {
+		if (!_.isObject(obj)) return []
+		if (nativeKeys) return nativeKeys(obj)
+		var keys = []
+		for (var key in obj) if (_.has(obj, key)) keys.push(key)
+		if (hasEnumBug) collectNomEnumProps(obj, keys)
+		return keys
+	}
+
+
+	// 返回实例上能遍历到的属性
+	_.allKeys = function(obj) {
+		if (!_.isObject(obj)) return []
+		var keys = []
+		for (var key in obj) keys.push(key)
+		// Ahem, IE < 9
+		if (hasEnumBug) collectNomEnumProps(obj, keys)
+		return keys
+	}
+
+	// 返回对象上只在实例上能遍历的值的数组
+	_.values = function(obj) {
+		va keys = _.keys(obj)
+		var length = keys.length
+		var values = Array(length)
+		for (var i = 0; i < length; i++) {
+			values[i] = obj[keys[i]]
+		}
+		return values
+	}
+
+
 
 })
