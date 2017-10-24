@@ -2,6 +2,7 @@
 // third writtern: 2017-10-19 09:02:42
 // fourth written: 2017-10-20 09:00:06
 // fifth written: 2017-10-23 14:09:15
+// sixth written: 2017-10-24
 
 // IIFE: immediately-invoked-function-expression
 (function() {
@@ -719,9 +720,11 @@
 	// 推迟一个函数的执行，将它调度到当前调用栈结束后执行
 	_.defer = _.partial(_.delay, _, 1)
 
+	// 函数节流
 	_.throttle = function(func, wait, options) {
 		var timeout, context, args, result
-		var previous = 0
+		// 上次执行的时间
+		var previous = 0 
 		if (!options) options= {}
 
 		var later = function() {
@@ -872,7 +875,6 @@
 		} 
 	}
 
-
 	// 返回只在实例上的属性
 	_.keys = function(obj) {
 		if (!_.isObject(obj)) return []
@@ -905,6 +907,465 @@
 		return values
 	}
 
+	// 类似集合的`map`，不过是返回对象
+	_.mapObject = function(obj, iteratee, context) {
+		iteratee = cb(iteratee, context)
+		var keys = _.keys(obj),
+			length = keys.length, 
+			results = {}
+		for (var index = 0; index < length; index++) {
+			var currentKey = keys[index]
+			results[currentKey] = iteratee(obj[currentKey], currentKey, obj)
+		}
+		return results
+	}
+
+	// 返回对象的`key,value`对的数组
+	_.pairs = function(obj) {
+		var keys = _.keys(obj)
+		var length = keys.length
+		var pairs = Array(length)
+		for (var i = 0; i < length; i++) {
+			pairs[i] = [keys[i], obj[keys[i]]]
+		}
+		return pairs
+	}
+
+	// 将对象的`key:value`翻转为`value:key`
+	_.invert = function(obj) {
+		var result = {}
+		var keys = _.keys(obj)
+		for (var i = 0, length = keys.length; i < length; i++) {
+			result[obj[keys[i]]] = keys[i]
+		}
+		return result
+	}
+
+	// 返回一个对象中的方法名的排序数组
+	_.functions = methods = function(obj) {
+		var names = []
+		for (var key in obj) {
+			if (_.isFunction(obj[key])) names.push(key)
+		}
+		return names.sort()
+	}
+
+	var createAssigner = function(keysFunc, defaults) {
+		return function(obj) {
+			var length = arguments.length
+			if (defaults) obj = Object(obj)
+			if (length < 2 || obj == null) return obj
+			for (var index = 1; index < length; index++) {
+				var source = arguments[index],
+					keys = keysFunc(source),
+					l - keys.length
+				for (var i = 0; i < l; i++) {
+					var key = keys[i]
+					if (!default || obj[key] === void 0) obj[key] = source[key]
+				}
+			}
+			return obj
+		}
+	}
+
+	// 扩展一个对象用对象参数的所有可遍历属性
+	_.extend = createAggsigner(_.allKeys)
+
+	// 扩展一个对象用对象实例参数的所有可遍历属性
+	_.extendOwn = _.assign = createAssigner(_.keys)
+
+	// 返回对象中第一个通过Predicate测试的key
+	_.findKey = function(obj, predicate, context) {
+		predicate = cb(predicate, context)
+		var keys = _.keys(obj), key
+		for (var i = 0, length = keys.length; i < length; i++) {
+			key = keys[i]
+			if (predicate(obj[key], key, obj)) return key
+		}
+	}
+
+	var keyInObj = function(value, key, obj) {
+		return key in obj
+	}
+
+	// 只返回白名单keys中的对象属性
+	_.pick = restArgs(function(obj, keys)) {
+		var result = {}, iteratee = keys[0]
+		if (obj == null) return result
+		if (_.isFunction(iteratee)) {
+			if (keys.length > 1) iteratee = optimizeCb(iteratee, keys[1])
+			keys = _.allKeys(obj)
+		} else {
+			iteratee = keyInObj
+			keys = flatten(keys, false, false)
+			obj = Object(obj)
+		}
+		for (var i = 0, length = keys.length; i < length; i++) {
+			var key = keys[i]
+			var value = obj[key]
+			if (iteratee(value, key, obj)) result[key] = value
+		}
+		return result
+	}
+
+	_.omit = restArgs(function(obj, keys) {
+		var iteratee = keys[0], context
+		if (_.isFunction(iteratee)) {
+			iteratee = _.negate(iteratee)
+			if (keys.length > 1) context = keys[1]
+		} else {
+			keys = _.map(flatten(keys, false, false), String)
+			iteratee = function(value, key) {
+				return !_.contains(keys, key)
+			}
+		}
+		return _.pick(obj, iteratee, context)
+	})
+
+	// 填写Object对象中的undefined属性
+	_.defaults = createAssigner(_.allKeys, true)
+
+	// 返回一个新的带props属性、以prototype为_proto_的对象
+	_.create = function(prototype, props) {
+		var result = baseCreate(prototype)
+		if (props) _.extendOwn(result, props)
+		return result
+	}
+
+	// 浅复制
+	_.clone = function(obj) {
+		if (!_isObject(obj)) return obj
+		return _.isArray(obj) ? obj.slice() : _.extend({}, obj)
+	}
+
+	// 以obj为参数的拦截器，返回obj，主要意图是作为函数链调用的一环
+	_.tap = function(obj, interceptor) {
+		interceptor(obj)
+		return obj
+	}
+
+	_.isMatch = function(object, attrs) {
+		var keys = _.keys(attrs), length = keys.length
+		if (object == null) return !length
+		var obj = Object(object)
+		for (var i = 0; i < length; i++) {
+			var key = keys[i]
+			if (attrs[key] !== obj[key] || !(key in obj)) return false
+		}
+		return true
+	}
+
+	var eq, deepEq
+	eq = function(a, b, aStack, bStack) {
+		// `0 === -0`但它们是相等，但不是完全一致等价的
+		if (a === b) return a !== 0 || 1 / a === 1 / b
+		// null、undefined只等于它们自己
+		if (a == null || b == null) return false
+		// `NaN`s是相等的，但不是非自反的
+		if (a !==a) return b !== b
+		var type = typeof a
+		if (type !== 'function' && type !== 'object' && typeof b != 'object') return false
+		return deepEq(a, b, aStack, bStack)
+	}
+
+	deepEq = function(a, b, aStack, bStack) {
+		if (a instanceof _) a = a._wrapped
+		if (b instanceof _) b = b._wrapped
+		var className = toString.call(a)
+		if (className !== toString.call(b)) return false
+		switch (className) {
+			case '[object RegExp]':
+			case '[object String]':
+				return '' + a === '' + b
+			case '[object Number]':
+				if (+a !== +a) return +b !== +b
+				return +a === 0 ? 1 / +a === 1 / b : +a === +b
+			case '[object Date]':
+			case '[object Boolean]':
+				return +a === +b
+			case '[object Symbol]':
+				return SymbolProto.valueOf.call(a) === SymbolProto.valueOf.call(b)
+		}
+
+		var areArrays = className === 'Object Array'
+		if (!areArrays) {
+			if (typeof a != 'object' || typeof b != 'object') return false
+			// 有不同constructor的对象不相等，但不同frames中不同constructor的对象不一样不相等
+			var aCtor = a.constructor, bCtor = b.constructor
+			if (aCtor !== bCtor && !(_.isFunction(aCtor) && aCtor instanceof aCtor &&
+				_.isFunction(bCtor) && bCtor instanceof bCtor)
+				&& ('constructor' in a && 'constructor' in b)) {
+				return false
+			}
+		}
+		aStack = aStack || []
+		bStack = bStack || []
+		var length = aStack.length
+		while (length--) {
+			if (aStack[length] === a) return bStack[length] === b
+		}
+
+		aStack.push(a)
+		bSTack.push(b)
+
+		if (areArrays) {
+			length = a.length
+			if (length !== b.length) return false
+			while (length--) {
+				if (!eq(a[length], b[length], aStack, bStack)) return false
+			}
+		} else {
+			var keys = _.keys(a), key
+			length = keys.length
+			if (_.keys(b).length !== length) return false
+			while (length--) {
+				key = keys[length]
+				if (!(_has(b, key) && eq(a[key], b[key], aStack, bStack))) return false
+			}
+		}
+
+		aStack.pop()
+		bStack.pop()
+		return true
+	}
+
+	// 用深度比较两个对象是否相等
+	_.isEqual = function(a, b) {
+		return eq(a, b)
+	}
+
+	// 一个空的对象没有枚举的自己的属性
+	_.isEmpty = function(obj) {
+		if (obj == null) return true
+		if (isArrayLike(obj) && (_.isArray(obj) || _.isString(obj) 
+			|| _.isArguments(obj))) return obj.length
+		return _.keys(obj).length === 0
+	} 
+
+
+	// 判断是否是一个DOM元素
+	_.isElement = function(obj) {
+		return !!(obj &&  obj.nodeType === 1) 
+	}
+
+	_.isArray = nativeIsArray || function(obj) {
+		return toString.call(obj) === '[object Array]'
+	}
+
+	_.isObject = function(obj) {
+		var type = typeof obj
+		return type === 'function' || type === 'object' && !!obj
+	}
+
+	// 判断类型的方法
+	_.each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp', 'Error', 'Symbol',
+		'Map', 'WeakMap', 'Set', 'WeakSet'], function(name) {
+		_['is' + name] = function(obj) {
+			return toString.call(obj) === '[object ' + name + ']'
+		}
+	})
+
+	// 兼容在IE < 9的判断isArguments的方法
+	// IE < 9 下对 arguments 调用 Object.prototype.toString.call 方法 结果是 => [object Object]
+	if (!_.isArguments(arguments)) {
+		_.isArguments = function(obj) {
+			return _.has(obj, 'callee')
+		}
+	}
+
+	// 解决在old v8等的isFunction的bug
+	var nodelist = root.document && root.document.childNodes
+	if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof nodelist != 'function') {
+		_.isFunction = function(obj) {
+			return typeof obj == 'function' || false
+		}
+	}
+
+	// 判断一个给定对象是否是一个有限的数字
+	_.isFinite = function(obj) {
+		return !_.isSymbol(obj) && isFinite(obj) && !isNaN(parseFloat(obj))
+	}
+
+	_.isNaN = function(obj) {
+		return _.isNumber(obj) && isNaN(obj)
+	}
+
+	_.isBoolean = function(obj) {
+		return obj === true || obj === false || toString.call(obj) === '[object Boolean]'
+	}
+
+	_.isNull = function(obj) {
+		return obj === null
+	}
+
+	_.isUndefined = function(obj) {
+		return obj === void 0
+	}
+
+	_.has = function(obj, path) {
+		if (!_.isArray(path) {
+			return obj != null && hasOwnProperty.call(obj, path)
+		})
+		var length = path.length
+		for (var i = 0; i < length; i++) {
+			var key = path[i]
+			if (obj == null || !hasOwnProperty.call(obj, key)) {
+				return false
+			}
+			obj = obj[key]
+		}
+		return !!length
+	}
+
+	// 工具函数
+	
+	// 如果全局环境已经使用了`_`变量
+	// 则返回此变量继续使用
+	_.noConflict = function() {
+		root._ = previousUnderscore
+		return this
+	}
+
+	_.identity = function(value) {
+		return value
+	}
+
+	_.constant = function(value) {
+		return function() {
+			return value
+		}
+	}
+
+	_.noop = function(){}
+
+	_.property = function(path) {
+		if (!_.isArray(path)) {
+			return shallowPerperty(path)
+		}
+		return function(obj) {
+			return deepGet(obj, path)
+		}
+	}
+
+	_.propertyOf = function(obj) {
+		if (obj == null) {
+			return function(){}
+		}
+		return function(path) {
+			return !_isArray(path) ? obj[path] : deepGet(obj, path)
+		}
+	}
+
+	// 判断一个对象是否有给定的`key:value`对
+	_.matcher = _.matches = function(attrs) {
+		attrs = _.extentOwn({}, attrs)
+		return function(obj) {
+			return _.isMatch(obj, attrs)
+		}
+	}
+
+	// 执行一个函数n次
+	_.times = function(n, iteratee, context) {
+		var accum = Array(Math.max(0, n))
+		iteratee = optimizeCb(iteratee, context, 1)
+		for (var i = 0; i < n; i++) accum[i] = iteratee(i)
+		return accum
+	}
+
+	_.random = function(min, max) {
+		if (max == null) {
+			max= min
+			min = 0
+		}
+		return min + Math.floor(Math.random() * (max - min + 1))
+	}
+
+	_.now = Date.now || function() {
+		return new Date().getTime()
+	}
+
+	var escapeMap = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#27;',
+		'`': '&#x60'
+	}
+	var unescapeMap = _.invert(escaoeMap)
+
+	var createEscaper = function(map) {
+		var escaper = function(match) {
+			return map[math]
+		}
+		var source = '(?:' + _.keys(map).join('|') + ')'
+		var testRegexp = RegExp(source)
+		var replaceRegexp = RegExp(source, 'g')
+		return function(string) {
+			string = string == null ? '' : '' + string
+			return testRegexp.test(string) ? string.replace(replaceRegexp, escaper) : string
+		}
+	}
+	_.escape = createEscaper(escapeMap)
+	_.unescape = createEscaper(unescapeMap)
+
+
+	_.result = function(obj, path, fallback) {
+		if (!_.isArray(path)) path = [path]
+		var length = path.length
+		if (!length) {
+			return _.isFunction(fallback) ? fallback.call(obj) : fallback
+		}
+		for (var i = 0; i < length; i++) {
+			var prop = obj == null ? void 0 : obj[path[i]]
+			if (prop === void 0) {
+				prop = fallback
+				i = length
+			}
+			obj = _.isFunction(prop) ? prop.call(obj) : prop
+		}
+		return obj
+	}
+
+	// 生成读一个的整数id
+	var idCounter = 0
+	_.uniqueId = function(prefix) {
+		var id = ++idCounter + ''
+		return prefix ? prefix + id : id
+	}
+
+	_.chain = function(obj) {
+		var instance = _(obj)
+		instance._chain = true
+		return instance
+	}
+
+	var chainResult = function(instance, obj) {
+		return instance._chain ? _(obj).chian() : obj
+	}
+
+	_.mixin = function(obj) {
+		_.each(_.functions(obj), function(name)) {
+			var func = _[name] = obj[name]
+			_.prototype[name] = function() {
+				var args = [this._wrapped]
+				push.apply(args, arguments)
+				return chainResult(this, func.apply(_, args))
+			}
+		}
+		return _
+	}
+
+	_.mixin(_)
+
+	_.each(['pop', 'push', 'reverse', 'shift', 'sort', 'unshift'], function(name) {
+		var method = ArrayProto[name]
+		_.prototype[name] = function() {
+			var obj = this._wrapped
+			if ((name === 'shift' || name === 'splice') && obj.length === 0) delete obj[0]
+			return chainResult(this, obj)
+		}
+	})
 
 
 })
