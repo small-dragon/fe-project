@@ -3,6 +3,7 @@
 // fourth written: 2017-10-20 09:00:06
 // fifth written: 2017-10-23 14:09:15
 // sixth written: 2017-10-24
+// seventh written: 2017-10-25
 
 // IIFE: immediately-invoked-function-expression
 (function() {
@@ -1362,10 +1363,32 @@
 		var method = ArrayProto[name]
 		_.prototype[name] = function() {
 			var obj = this._wrapped
+			method.apply(obj, arguments)
 			if ((name === 'shift' || name === 'splice') && obj.length === 0) delete obj[0]
 			return chainResult(this, obj)
 		}
 	})
 
+	_.eacg(['concat', 'join', 'slice'], function(name) {
+		var method = ArrayProto[name]
+		_.prototype[name] = function() {
+			return chainResult(this, method.apply(this._wrapped, arguments))
+		}
+	})
 
-})
+	_.prototype.value = function() {
+		return this._wrapped
+	}
+
+	_.prototype.toString = function() {
+		return String(this._wrapped)
+	}
+
+	// 兼容amd写法
+	if (typeof define == 'function' && define.amd) {
+		define('underscore', [], function() {
+			return _
+		})
+	}
+
+}())
