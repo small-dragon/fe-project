@@ -1,9 +1,0 @@
-<div class="send-section" v-show="tabs.comment">
-      <input class="fl text" type="text" placeholder="输入的评论内容" v-model="yourComment" value="" v-on:keyup.enter="popup('comment')">
-      <a class="fr btn-submit" v-on:click="popup('comment')">发送</a>
-</div>
-<div class="send-section" v-show="activityTabs.question" style="display:none;">
-	<input class="fl text" type="text" placeholder="输入的问题内容" v-model="yourQuestion" value="" v-on:keyup.enter="popup('question')">
-	<a class="fr btn-submit" v-on:click="popup('question')">发送</a>
-</div>
- 
